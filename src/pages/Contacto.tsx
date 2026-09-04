@@ -1,5 +1,6 @@
-import { useContactForm } from '../../hooks/useContactForm'
-import Input from '../../components/ui/Input'
+// Página de contacto con información del local y formulario de consultas.
+import { useContactForm } from '../hooks/useContactForm'
+import Input from '../components/Input'
 
 export default function Contacto() {
   const { sent, submit } = useContactForm()

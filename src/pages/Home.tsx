@@ -1,6 +1,7 @@
-import { useProducts } from '../../hooks/useProducts'
-import { formatPrice } from '../../utils/formatPrice'
-import Badge from '../../components/ui/Badge'
+// Página inicial con presentación, catálogo y garantía de calidad.
+import { useProducts } from '../hooks/useProducts'
+import { formatPrice } from '../utils/formatPrice'
+import Badge from '../components/Badge'
 
 export default function Home() {
   const products = useProducts()

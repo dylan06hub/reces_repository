@@ -1,3 +1,4 @@
+// Hook que valida y controla el estado de envío del formulario.
 import { useState } from 'react'
 import { isValidEmail } from '../utils/validators'
 

@@ -1,3 +1,4 @@
+// Cabecera compartida con marca y navegación principal.
 type HeaderProps = { onNavigate: (path: string) => void }
 
 export default function Header({ onNavigate }: HeaderProps) {

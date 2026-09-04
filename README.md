@@ -1,4 +1,26 @@
-# React + TypeScript + Vite
+# Reces S.R.L.
+
+Sitio web de la carnicería Reces S.R.L., construido con React, TypeScript y Vite.
+
+## Estructura
+
+- `src/main.tsx`: entrada de la aplicación.
+- `src/App.tsx`: contenedor principal y layout global.
+- `src/router.tsx`: rutas disponibles.
+- `src/components/`: componentes compartidos entre vistas.
+- `src/pages/`: páginas `Home`, `Nosotros` y `Contacto`.
+- `src/data/`: catálogo de productos.
+- `src/hooks/`: lógica reutilizable de productos y formularios.
+- `src/utils/`: formateadores y validaciones.
+- `src/styles/global.css`: variables, reset y estilos globales.
+
+## Comandos
+
+```bash
+npm run dev
+npm run build
+npm run lint
+```
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 

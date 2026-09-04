@@ -1,8 +1,8 @@
+// Contenedor principal: selecciona la página actual y monta el layout global.
 import { useEffect, useState } from 'react'
-import Contacto from './pages/Contacto/Contacto'
-import Home from './pages/Home/Home'
-import Nosotros from './pages/Nosotros/Nosotros'
-import Layout from './components/layout/Layout'
+import Header from './components/Header'
+import Footer from './components/Footer'
+import { routes } from './router'
 
 function App() {
 	const [path, setPath] = useState(window.location.pathname)
@@ -19,9 +19,9 @@ function App() {
 		window.scrollTo({ top: 0, behavior: 'smooth' })
 	}
 
-	const page = path === '/nosotros' ? <Nosotros /> : path === '/contacto' ? <Contacto /> : <Home />
+	const Page = routes[path as keyof typeof routes] ?? routes['/']
 
-	return <Layout onNavigate={navigate}>{page}</Layout>
+	return <><Header onNavigate={navigate} /><main><Page /></main><Footer /></>
 }
 
 export default App

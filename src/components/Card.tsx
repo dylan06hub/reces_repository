@@ -1,3 +1,4 @@
+// Contenedor reutilizable para contenido agrupado.
 import type { ReactNode } from 'react'
 
 export default function Card({ children }: { children: ReactNode }) {

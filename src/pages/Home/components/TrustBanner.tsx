@@ -1,1 +1,0 @@
-export default function TrustBanner() { return <section className="trust"><p className="eyebrow">Desde 1984</p><h2>Frescura y calidad de origen</h2><p>Trabajamos con productores seleccionados y cuidamos cada detalle de la cadena de frío.</p></section> }

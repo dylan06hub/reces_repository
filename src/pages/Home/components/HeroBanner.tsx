@@ -1,1 +1,0 @@
-export default function HeroBanner() { return <div className="hero"><div><p className="eyebrow">Carnicería de selección</p><h1>El corte justo<br /><em>para cada ocasión.</em></h1><p>Calidad de origen, maduración precisa y el sabor que se reconoce desde el primer bocado.</p><a className="button" href="#productos">Ver cortes</a></div></div> }

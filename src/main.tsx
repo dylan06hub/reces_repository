@@ -1,7 +1,8 @@
+// Punto de entrada de Vite: inicia React dentro del elemento root.
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import '../styles/global.css'
-import App from '../App'
+import './styles/global.css'
+import App from './App'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

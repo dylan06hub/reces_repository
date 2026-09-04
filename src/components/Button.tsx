@@ -1,3 +1,4 @@
+// Botón reutilizable para acciones de la interfaz.
 import type { ButtonHTMLAttributes } from 'react'
 
 export default function Button({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {

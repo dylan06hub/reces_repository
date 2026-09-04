@@ -1,0 +1,1 @@
+export default function AboutIntro() { return <section className="section about-copy"><p className="eyebrow">Reces S.R.L.</p><h2>El oficio de saber elegir</h2><p>Somos una familia dedicada a la carne desde hace más de cuatro décadas. Seleccionamos cada pieza con criterio, la trabajamos con respeto y la entregamos en su mejor momento.</p></section> }

@@ -1,0 +1,1 @@
+export default function ContactInfoCards() { return <div className="contact-details"><p><strong>Local</strong><br />Av. Siempreviva 1234, Buenos Aires</p><p><strong>Teléfono</strong><br />+54 9 11 0000 0000</p></div> }

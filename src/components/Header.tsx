@@ -1,14 +1,52 @@
-// Cabecera compartida con marca y navegación principal.
-type HeaderProps = { onNavigate: (path: string) => void }
+import { Link } from 'react-router-dom';
+import SearchBar from './SearchBar';
 
-export default function Header({ onNavigate }: HeaderProps) {
-  return <header className="site-header">
-    <button className="brand" onClick={() => onNavigate('/')} aria-label="Ir al inicio">RECES<span>S.R.L.</span></button>
-    <nav aria-label="Navegación principal">
-      <button onClick={() => onNavigate('/')}>Inicio</button>
-      <button onClick={() => onNavigate('/nosotros')}>Nosotros</button>
-      <button onClick={() => onNavigate('/contacto')}>Contacto</button>
-    </nav>
-    <a className="header-phone" href="tel:+5491100000000">+54 9 11 0000 0000</a>
-  </header>
-}
+type HeaderProps = {
+  onNavigate?: (nextPath: string) => void;
+};
+
+const Header = ({ onNavigate }: HeaderProps) => {
+  const handleNavigate = (path: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    onNavigate?.(path);
+    window.history.pushState({}, '', path);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
+
+  return (
+    <header className="header">
+      <div className="header-left">
+        <img className="logo" src="/logo.png" alt="Logo RESES" />
+        <h1 className="title">RESES S.R.L.</h1>
+      </div>
+
+      <div className="header-center">
+        <SearchBar />
+      </div>
+
+      <nav>
+        <ul className="nav-links">
+          <li>
+            <Link to="/" onClick={handleNavigate('/')}>
+              Inicio
+            </Link>
+          </li>
+
+          <li>
+            <Link to="/nosotros" onClick={handleNavigate('/nosotros')}>
+              Nosotros
+            </Link>
+          </li>
+
+          <li>
+            <Link to="/contacto" onClick={handleNavigate('/contacto')}>
+              Contacto
+            </Link>
+          </li>
+        </ul>
+      </nav>
+    </header>
+  );
+};
+
+export default Header;

@@ -1,4 +1,4 @@
-// Página inicial con presentación, catálogo y garantía de calidad.
+// Página inicial con carrusel, catálogo y garantía de calidad.
 
 import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
@@ -6,42 +6,53 @@ import Badge from '../components/Badge'
 import Carrusel from '../components/Carrusel'
 
 const Home = () => {
-
   const products = useProducts()
 
   return (
     <>
       <main>
 
-        {/* CARRUSEL PRINCIPAL */}
+        {/* =========================
+            CARRUSEL PRINCIPAL
+        ========================== */}
         <Carrusel />
 
-        {/* PRODUCTOS */}
-        <section className="section" id="productos">
 
-          <div className="section-heading">
+        {/* =========================
+            PRODUCTOS
+        ========================== */}
+        <section className="productos-home" id="productos">
 
-            <div>
-              <p className="eyebrow">Nuestra selección</p>
-              <h2>Los mejores cortes</h2>
-            </div>
+          <div className="productos-titulo">
+
+            <p className="productos-etiqueta">
+              NUESTRA SELECCIÓN
+            </p>
+
+            <h2>
+              LOS MEJORES CORTES DE CARNE
+            </h2>
 
             <p>
-              Elegidos por expertos, listos para llevar a tu mesa.
+              Seleccionamos nuestros mejores cortes para que disfrutes
+              productos de calidad en cada ocasión.
             </p>
 
           </div>
 
-          <div className="product-grid">
+
+          {/* GRILLA DE PRODUCTOS */}
+          <div className="productos-grid">
 
             {products.map((product) => (
 
               <article
-                className="product-card"
+                className="producto-card"
                 key={product.name}
               >
 
-                <div className="product-image">
+                {/* IMAGEN DEL PRODUCTO */}
+                <div className="producto-imagen">
 
                   <img
                     src={product.image}
@@ -49,24 +60,44 @@ const Home = () => {
                   />
 
                   {product.offer && (
-                    <Badge>¡OFERTA!</Badge>
+                    <Badge>
+                      OFERTA
+                    </Badge>
                   )}
 
                 </div>
 
-                <div>
 
-                  <h3>{product.name}</h3>
+                {/* INFORMACIÓN */}
+                <div className="producto-info">
 
-                  <strong>
-                    {formatPrice(product.price)}
-                  </strong>
+                  <h3>
+                    {product.name}
+                  </h3>
 
-                  {product.previousPrice && (
-                    <del>
-                      {formatPrice(product.previousPrice)}
-                    </del>
-                  )}
+                  <p className="producto-descripcion">
+                    Corte seleccionado
+                  </p>
+
+
+                  {/* PRECIO */}
+                  <div className="producto-precio">
+
+                    {product.previousPrice && (
+                      <del>
+                        {formatPrice(product.previousPrice)}
+                      </del>
+                    )}
+
+                    <strong>
+                      {formatPrice(product.price)}
+                    </strong>
+
+                    <span>
+                      /kg
+                    </span>
+
+                  </div>
 
                 </div>
 
@@ -78,11 +109,14 @@ const Home = () => {
 
         </section>
 
-        {/* CALIDAD */}
+
+        {/* =========================
+            SECCIÓN DE CALIDAD
+        ========================== */}
         <section className="trust">
 
           <p className="eyebrow">
-            Desde 1984
+            DESDE 1984
           </p>
 
           <h2>

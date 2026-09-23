@@ -1,13 +1,138 @@
-// Página inicial con presentación, catálogo y garantía de calidad.
+// Página inicial con carrusel, catálogo y garantía de calidad.
+
 import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 import Badge from '../components/Badge'
+import Carrusel from '../components/Carrusel'
 
-export default function Home() {
+const Home = () => {
   const products = useProducts()
-  return <>
-    <section className="hero"><div><p className="eyebrow">Carnicería de selección</p><h1>El corte justo<br /><em>para cada ocasión.</em></h1><p>Calidad de origen, maduración precisa y el sabor que se reconoce desde el primer bocado.</p><a className="button" href="#productos">Ver cortes</a></div></section>
-    <section className="section" id="productos"><div className="section-heading"><div><p className="eyebrow">Nuestra selección</p><h2>Los mejores cortes</h2></div><p>Elegidos por expertos, listos para llevar a tu mesa.</p></div><div className="product-grid">{products.map((product) => <article className="product-card" key={product.name}><div className="product-image"><img src={product.image} alt={product.name} />{product.offer && <Badge>¡OFERTA!</Badge>}</div><div><h3>{product.name}</h3><strong>{formatPrice(product.price)}</strong>{product.previousPrice && <del>{formatPrice(product.previousPrice)}</del>}</div></article>)}</div></section>
-    <section className="trust"><p className="eyebrow">Desde 1984</p><h2>Frescura y calidad de origen</h2><p>Trabajamos con productores seleccionados y cuidamos cada detalle de la cadena de frío.</p></section>
-  </>
+
+  return (
+    <>
+      <main>
+
+        {/* =========================
+            CARRUSEL PRINCIPAL
+        ========================== */}
+        <Carrusel />
+
+
+        {/* =========================
+            PRODUCTOS
+        ========================== */}
+        <section className="productos-home" id="productos">
+
+          <div className="productos-titulo">
+
+            <p className="productos-etiqueta">
+              NUESTRA SELECCIÓN
+            </p>
+
+            <h2>
+              LOS MEJORES CORTES DE CARNE
+            </h2>
+
+            <p>
+              Seleccionamos nuestros mejores cortes para que disfrutes
+              productos de calidad en cada ocasión.
+            </p>
+
+          </div>
+
+
+          {/* GRILLA DE PRODUCTOS */}
+          <div className="productos-grid">
+
+            {products.map((product) => (
+
+              <article
+                className="producto-card"
+                key={product.name}
+              >
+
+                {/* IMAGEN DEL PRODUCTO */}
+                <div className="producto-imagen">
+
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                  />
+
+                  {product.offer && (
+                    <Badge>
+                      OFERTA
+                    </Badge>
+                  )}
+
+                </div>
+
+
+                {/* INFORMACIÓN */}
+                <div className="producto-info">
+
+                  <h3>
+                    {product.name}
+                  </h3>
+
+                  <p className="producto-descripcion">
+                    Corte seleccionado
+                  </p>
+
+
+                  {/* PRECIO */}
+                  <div className="producto-precio">
+
+                    {product.previousPrice && (
+                      <del>
+                        {formatPrice(product.previousPrice)}
+                      </del>
+                    )}
+
+                    <strong>
+                      {formatPrice(product.price)}
+                    </strong>
+
+                    <span>
+                      /kg
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </article>
+
+            ))}
+
+          </div>
+
+        </section>
+
+
+        {/* =========================
+            SECCIÓN DE CALIDAD
+        ========================== */}
+        <section className="trust">
+
+          <p className="eyebrow">
+            DESDE 1984
+          </p>
+
+          <h2>
+            Frescura y calidad de origen
+          </h2>
+
+          <p>
+            Trabajamos con productores seleccionados y cuidamos
+            cada detalle de la cadena de frío.
+          </p>
+
+        </section>
+
+      </main>
+    </>
+  )
 }
+
+export default Home

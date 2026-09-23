@@ -1,4 +1,23 @@
 // Buscador reutilizable para filtrar contenido del catálogo.
-export default function SearchBar() {
-  return <label className="search"><span>Buscar un corte</span><input type="search" placeholder="¿Qué estás buscando?" /></label>
-}
+
+
+import { useState } from 'react';
+
+const SearchBar = () => {
+  const [search, setSearch] = useState('');
+
+  return (
+    <div className="search-bar">
+      <span className="search-icon">⌕</span>
+
+      <input
+        type="text"
+        placeholder="Buscar tu corte preferido (Asado, Bife, Vacío)..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+    </div>
+  );
+};
+
+export default SearchBar;

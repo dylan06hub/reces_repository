@@ -1,4 +1,7 @@
 // Página institucional con historia, estadísticas y valores de la empresa.
+import Button from '../components/Button'
+import Card from '../components/Card'
+
 const stats = [
   { value: '40+', label: 'años de oficio' },
   { value: '100%', label: 'trazabilidad' },
@@ -37,6 +40,9 @@ export default function Nosotros() {
           <p>
             Más de cuatro décadas cuidando cada corte, cada entrega y cada relación con quienes confían en nosotros.
           </p>
+          <div className="hero-actions">
+            <Button type="button">Ver productos</Button>
+          </div>
         </div>
       </section>
 
@@ -76,7 +82,7 @@ export default function Nosotros() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Lo que nos define</p>
-            <h2>Valorez con historia</h2>
+            <h2>Valores con historia</h2>
           </div>
           <p>
             Trabajamos todos los días para sostener una tradición basada en el rigor, la honestidad y el sabor.
@@ -85,11 +91,11 @@ export default function Nosotros() {
 
         <div className="value-grid">
           {values.map((value) => (
-            <article key={value.number} className="value-card">
+            <Card key={value.number} className="value-card">
               <strong>{value.number}</strong>
               <h3>{value.title}</h3>
               <p>{value.text}</p>
-            </article>
+            </Card>
           ))}
         </div>
       </section>

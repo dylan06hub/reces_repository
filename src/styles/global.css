@@ -35,6 +35,14 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
   font-size: 1.05rem;
   line-height: 1.7;
 }
+.hero-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 24px;
+}
+.card {
+  display: block;
+}
 .about-story {
   display: grid;
   gap: 36px;

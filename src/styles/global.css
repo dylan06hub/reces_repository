@@ -13,7 +13,7 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
 .section { margin: auto; max-width: 1240px; padding: 90px 5vw; } .section-heading { align-items: end; display: flex; justify-content: space-between; margin-bottom: 42px; } .section-heading > p { color: var(--muted); max-width: 230px; } .product-grid { display: grid; gap: 28px 18px; grid-template-columns: repeat(3, 1fr); } .product-image { aspect-ratio: 1 / 1.1; background: var(--cream); overflow: hidden; position: relative; } .product-image img { height: 100%; object-fit: cover; width: 100%; } .badge { background: var(--red); color: white; font-size: .65rem; font-weight: 700; left: 12px; letter-spacing: .1em; padding: 8px 10px; position: absolute; text-transform: uppercase; top: 12px; } .product-card strong { font-size: 1rem; } del { color: var(--muted); font-size: .8rem; margin-left: 10px; } .trust { background: var(--red); color: white; padding: 90px 10vw; } .trust .eyebrow { color: #ffb4a5; } .trust h2 { max-width: 600px; } .trust p:last-child { max-width: 420px; }
 .nosotros-page { background: var(--paper); }
 .about-hero {
-  background: linear-gradient(135deg, #241a17 0%, #3b2b26 38%, #5a3a33 100%);
+  background: #342321;
   position: relative;
   isolation: isolate;
 }
@@ -24,14 +24,14 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
   width: 420px;
   height: 420px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   z-index: -1;
 }
 .about-hero .hero-copy {
   max-width: 620px;
 }
 .about-hero p:not(.eyebrow) {
-  color: rgba(255, 255, 255, 0.84);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 1.05rem;
   line-height: 1.7;
 }
@@ -93,7 +93,7 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
 }
 .value-grid { display: grid; gap: 18px; grid-template-columns: repeat(3, 1fr); }
 .value-card {
-  background: linear-gradient(180deg, #fffdfb 0%, #f6efe9 100%);
+  background: #fffdfb;
   border: 1px solid var(--line);
   padding: 26px 22px 20px;
   transition: transform .2s ease, box-shadow .2s ease;
@@ -682,3 +682,4 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
 
   z-index: 2;
 }
+

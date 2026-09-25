@@ -2,21 +2,21 @@ import { useEffect, useState } from 'react'
 
 const slides = [
   {
-    image: '/carne3.jpeg',
+    image: '/img/carne3.jpeg',
     tag: 'SÚPER PROMO EXCLUSIVA ONLINE',
     title: 'OFERTAS DE LA SEMANA',
     subtitle: '2×1 en Cortes Selectos de Ternera',
     text: 'Llevá la mejor calidad para tu parrilla. Cortes seleccionados y frescos para disfrutar en cada ocasión.',
   },
   {
-    image: '/carne2.jpeg',
+    image: '/img/carne2.jpeg',
     tag: 'CALIDAD QUE SE NOTA',
     title: 'CORTES FRESCOS',
     subtitle: 'Seleccionados para tu mesa',
     text: 'Elegimos cuidadosamente cada corte para ofrecerte sabor, calidad y frescura en cada compra.',
   },
   {
-    image: '/carne1.jpeg',
+    image: '/img/carne1.jpeg',
     tag: 'ESPECIAL PARA EL FINDE',
     title: 'EL ASADO EMPIEZA ACÁ',
     subtitle: 'Todo lo que necesitás para compartir',

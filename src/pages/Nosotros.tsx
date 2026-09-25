@@ -26,17 +26,17 @@ const values = [
   {
     icon: '✦',
     title: 'Calidad sin Compromisos',
-    text: 'Seleccionamos cortes premium con controles rigurosos para asegurar sabor, textura y consistencia en cada pieza.'
+    text: 'Seleccionamos cortes premium con controles rigurosos para asegurar sabor, textura y consistencia en cada pieza. Cada animal pasa por criterios estrictos de elección y mantenimiento para garantizar una experiencia uniforme, sabrosa y confiable en cada compra.'
   },
   {
     icon: '♡',
     title: 'Tradición Familiar',
-    text: 'Mantener viva la historia del asado argentino y la atención cercana que distingue a nuestra familia.'
+    text: 'Mantener viva la historia del asado argentino y la atención cercana que distingue a nuestra familia. Valoramos el trato humano, la confianza de nuestros clientes y la forma en que el buen producto se comparte alrededor de la mesa.'
   },
   {
     icon: '▣',
     title: 'Cadena de Frío Express',
-    text: 'Nuestros envíos y entregas se realizan en condiciones ideales para preservar la frescura desde el origen hasta tu hogar.'
+    text: 'Nuestros envíos y entregas se realizan en condiciones ideales para preservar la frescura desde el origen hasta tu hogar. La temperatura, la rapidez y la responsabilidad con cada entrega son pilares fundamentales en la forma en que trabajamos.'
   }
 ]
 
@@ -72,11 +72,15 @@ export default function Nosotros() {
             </h1>
 
             <p>
-              Fundada en las fértiles tierras de pasturas naturales, Reses S.R.L. nació con un propósito claro: redefinir la experiencia de la carne premium en el hogar.
+              Fundada en las fértiles tierras de pasturas naturales, Reses S.R.L. nació con un propósito claro: redefinir la experiencia de la carne premium en el hogar. Desde el primer día, apostamos por un modelo de trabajo cercano, honesto y centrado en la calidad real del producto.
             </p>
 
             <p>
-              Lo que comenzó hace más de cuatro décadas con un humilde emprendimiento familiar, hoy se consolida como una marca de referencia en calidad, servicio y tradición.
+              Lo que comenzó hace más de cuatro décadas con un humilde emprendimiento familiar, hoy se consolida como una marca de referencia en calidad, servicio y tradición. Nuestra misión es acompañar cada mesa con cortes seleccionados, atención personalizada y un compromiso profundo con la frescura, la consistencia y la confianza de quienes nos eligen.
+            </p>
+
+            <p>
+              A lo largo de los años construimos una relación cercana con productores, clientes y familias que valoran la excelencia del asado argentino. Ese vínculo, junto con una constante búsqueda de mejora, nos permite ofrecer una experiencia más cuidada, más genuina y más sabrosa en cada compra.
             </p>
 
             <div className="metrics">
@@ -132,7 +136,7 @@ export default function Nosotros() {
           <p className="quote-tag">Nuestra pasión cruda</p>
           <h2>Saber elegir, saber servir</h2>
           <p>
-            La maduración perfecta y la trazabilidad de origen aseguran que cada bocado en tu mesa sea un testimonio vivo de la verdadera excelencia criolla.
+            La maduración perfecta y la trazabilidad de origen aseguran que cada bocado en tu mesa sea un testimonio vivo de la verdadera excelencia criolla. Cuidamos cada detalle del proceso, desde la selección de los animales hasta la entrega final, para que la carne no solo se vea impecable, sino que también transmita sabor, textura y autenticidad en cada preparación.
           </p>
         </div>
       </section>
@@ -143,7 +147,7 @@ export default function Nosotros() {
           <p className="eyebrow">Nuestros pilares</p>
           <h2>Valores que sustentan nuestro trabajo</h2>
           <p>
-            En Reses S.R.L., no solo vendemos cortes de carne; honramos un estilo de vida que valora la procedencia, el servicio y la calidad en cada detalle.
+            En Reses S.R.L., no solo vendemos cortes de carne; honramos un estilo de vida que valora la procedencia, el servicio y la calidad en cada detalle. Cada decisión que tomamos gira en torno a ofrecer una experiencia confiable para familias, parrilleros y amantes de la buena carne, con la atención que merece una tradición hecha con paciencia, respeto y amor por lo que hacemos.
           </p>
         </div>
 

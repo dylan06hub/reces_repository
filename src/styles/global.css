@@ -207,7 +207,7 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
 .about-quote {
   width: min(1240px, calc(100% - 34px));
   margin: 18px auto 0;
-  background-image: linear-gradient(rgba(20, 12, 10, 0.56), rgba(20, 12, 10, 0.56)), url('https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1600&q=80');
+  background-image: linear-gradient(rgba(20, 12, 10, 0.56), rgba(20, 12, 10, 0.56)), url('/img/image copy 3.png');
   background-size: cover;
   background-position: center;
   min-height: 330px;
@@ -249,6 +249,49 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
   font-size: 1rem;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.87);
+}
+
+.about-featured {
+  width: min(1240px, calc(100% - 34px));
+  margin: 28px auto 0;
+}
+
+.about-featured__image {
+  position: relative;
+  min-height: 330px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  border-radius: 22px;
+  overflow: hidden;
+  background-image: linear-gradient(rgba(22, 19, 17, 0.56), rgba(22, 19, 17, 0.56)), url('/img/image copy 3.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.about-featured__content {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  text-align: center;
+  color: #fff;
+}
+
+.about-featured__content .eyebrow {
+  color: #f9d2bf;
+  margin-bottom: 12px;
+}
+
+.about-featured__content h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.2rem, 4vw, 4.2rem);
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
 }
 
 .about-values {

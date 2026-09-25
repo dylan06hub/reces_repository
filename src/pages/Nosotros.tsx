@@ -9,18 +9,15 @@ const stats = [
 
 const slides = [
   {
-    image:
-      'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80',
+    image: '/img/image.png',
     alt: 'Carnicería con mostrador y cortes'
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=1200&q=80',
+    image: '/img/image copy.png',
     alt: 'Corte de carne premium'
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1600&q=80',
+    image: '/img/image copy 2.png',
     alt: 'Vista de carnicería moderna'
   }
 ]
@@ -139,6 +136,7 @@ export default function Nosotros() {
           </p>
         </div>
       </section>
+
 
       <section className="about-values">
         <div className="about-values__header">

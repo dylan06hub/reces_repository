@@ -12,15 +12,11 @@ const Home = () => {
     <>
       <main>
 
-        {/* =========================
-            CARRUSEL PRINCIPAL
-        ========================== */}
+        {/*CARRUSEL PRINCIPAL*/}
         <Carrusel />
 
 
-        {/* =========================
-            PRODUCTOS
-        ========================== */}
+        {/* PRODUCTOS */}
         <section className="productos-home" id="productos">
 
           <div className="productos-titulo">
@@ -116,7 +112,7 @@ const Home = () => {
         <section className="trust">
 
           <p className="eyebrow">
-            DESDE 1984
+            DESDE XXXX
           </p>
 
           <h2>

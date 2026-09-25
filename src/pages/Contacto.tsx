@@ -46,9 +46,11 @@ export default function Contacto() {
         <h2>¿Que podemos preparar para vos?</h2>
         <p>Escribinos y te respondemos a la brevedad.</p>
         <div className="contact-details">
-          <p><strong>Local</strong><br />Av. Siempreviva 1234, Buenos Aires</p>
+          <p><strong>Local Trelew</strong><br />Av. Eva Perón 1340, Reses</p>
+          <p><strong>Local Rawson</strong><br />Av. Libertad 358, Superunion</p>
           <p><strong>Horarios</strong><br />Lunes a sabado, de 8:00 a 20:00</p>
-          <p><strong>Telefono</strong><br /><a href="tel:+5491100000000">+54 9 11 0000 0000</a></p>
+          <p><strong>Telefono Trelew</strong><br /><a href="tel:+54 9 280 483-1430">+54 9 280 483-1430</a></p>
+          <p><strong>Telefono Rawson</strong><br /><a href="tel:+54 9 280 501-3245">+54 9 280 501-3245</a></p>
         </div>
       </div>
       <form className="contact-form" onSubmit={handleSubmit}>

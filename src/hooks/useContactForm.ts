@@ -4,11 +4,17 @@ import { isValidEmail } from '../utils/validators'
 
 export const useContactForm = () => {
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
   const submit = (formData: FormData) => {
     const email = String(formData.get('email') ?? '')
-    if (!isValidEmail(email)) return false
+    setError('')
+    setSent(false)
+    if (!isValidEmail(email)) {
+      setError('Ingresa un email valido para poder responderte.')
+      return false
+    }
     setSent(true)
     return true
   }
-  return { sent, submit }
+  return { sent, error, submit }
 }

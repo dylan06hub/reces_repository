@@ -11,9 +11,34 @@ export default function Contacto() {
   }
 
   return <>
-    <section className="page-hero contact-hero">
-      <p className="eyebrow">Estamos para ayudarte</p>
-      <h1>Hablemos<br /><em>de carne.</em></h1>
+    <section className="contact-hero" aria-label="Horarios de atención">
+      <div className="contact-hours-banner">
+        <div className="contact-hours-banner__header">
+          <span className="contact-hours-banner__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2.8a9.2 9.2 0 1 1 0 18.4 9.2 9.2 0 0 1 0-18.4Zm0 2.2a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm.8 2.4h-1.6v6.2l4.7 2.8 0.8-1.3-3.9-2.3V7.4Z" fill="currentColor" />
+            </svg>
+          </span>
+          <h1>HORARIOS DE ATENCIÓN</h1>
+        </div>
+
+        <div className="contact-hours-banner__divider" />
+
+        <div className="contact-hours-banner__row">
+          <span>Lunes a Sábados (Trelew):</span>
+          <strong>09:00 - 13:00 | 17:00 - 21:00</strong>
+        </div>
+
+        <div className="contact-hours-banner__row">
+          <span>Lunes a Domingos y Feriados provinciales (Rawson):</span>
+          <strong>08:30 - 13:30 | 17:00 - 21:00</strong>
+        </div>
+
+        <div className="contact-hours-banner__row contact-hours-banner__row--compact">
+          <span>Feriados nacionales:</span>
+          <strong>09:00 - 13:00 (Solo Rawson)</strong>
+        </div>
+      </div>
     </section>
     <section className="section contact-layout">
       <div>

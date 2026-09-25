@@ -1,6 +1,7 @@
 // Mapa central de las rutas disponibles y sus páginas.
+import Admin from './pages/Admin'
 import Contacto from './pages/Contacto'
 import Home from './pages/Home'
 import Nosotros from './pages/Nosotros'
 
-export const routes = { '/': Home, '/nosotros': Nosotros, '/contacto': Contacto }
+export const routes = { '/': Home, '/nosotros': Nosotros, '/contacto': Contacto, '/admin': Admin }

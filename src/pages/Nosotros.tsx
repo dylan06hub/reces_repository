@@ -1,98 +1,166 @@
 // Página institucional con historia, estadísticas y valores de la empresa.
+import { useEffect, useState } from 'react'
+
 const stats = [
-  { value: '40+', label: 'años de oficio' },
-  { value: '100%', label: 'trazabilidad' },
-  { value: '12k', label: 'familias nos eligen' }
+  { value: '40+', label: 'años de trayectoria' },
+  { value: '100%', label: 'pasturas naturales' },
+  { value: '12k', label: 'clientes felices' }
+]
+
+const slides = [
+  {
+    image:
+      'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Carnicería con mostrador y cortes'
+  },
+  {
+    image:
+      'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Corte de carne premium'
+  },
+  {
+    image:
+      'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1600&q=80',
+    alt: 'Vista de carnicería moderna'
+  }
 ]
 
 const values = [
   {
-    number: '01',
-    title: 'Calidad',
-    text: 'El estándar que guía cada elección.'
+    icon: '✦',
+    title: 'Calidad sin Compromisos',
+    text: 'Seleccionamos cortes premium con controles rigurosos para asegurar sabor, textura y consistencia en cada pieza.'
   },
   {
-    number: '02',
-    title: 'Tradición',
-    text: 'Experiencia que se transmite con orgullo.'
+    icon: '♡',
+    title: 'Tradición Familiar',
+    text: 'Mantener viva la historia del asado argentino y la atención cercana que distingue a nuestra familia.'
   },
   {
-    number: '03',
-    title: 'Cadena de frío',
-    text: 'Cuidado constante desde el origen.'
+    icon: '▣',
+    title: 'Cadena de Frío Express',
+    text: 'Nuestros envíos y entregas se realizan en condiciones ideales para preservar la frescura desde el origen hasta tu hogar.'
   }
 ]
 
 export default function Nosotros() {
+  const [activeSlide, setActiveSlide] = useState(0)
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % slides.length)
+    }, 5000)
+
+    return () => window.clearInterval(interval)
+  }, [])
+
+  const goToPrevious = () => {
+    setActiveSlide((current) => (current - 1 + slides.length) % slides.length)
+  }
+
+  const goToNext = () => {
+    setActiveSlide((current) => (current + 1) % slides.length)
+  }
+
   return (
     <main className="nosotros-page">
-      <section className="page-hero about-hero">
-        <div className="hero-copy">
-          <p className="eyebrow">Nuestra historia</p>
-          <h1>
-            Una tradición
-            <br />
-            <em>de sabor.</em>
-          </h1>
-          <p>
-            Más de cuatro décadas cuidando cada corte, cada entrega y cada relación con quienes confían en nosotros.
-          </p>
-        </div>
-      </section>
+      <section className="about-showcase">
+        <div className="about-showcase__content">
+          <div className="about-copy">
+            <p className="eyebrow">Desde 1985</p>
+            <h1>
+              Una tradición de sabor
+              <br />
+              y calidad en tu mesa
+            </h1>
 
-      <section className="section about-story">
-        <div className="about-story__intro">
-          <p className="eyebrow">Reces S.R.L.</p>
-          <h2>El oficio de saber elegir</h2>
-        </div>
+            <p>
+              Fundada en las fértiles tierras de pasturas naturales, Reses S.R.L. nació con un propósito claro: redefinir la experiencia de la carne premium en el hogar.
+            </p>
 
-        <div className="about-story__body">
-          <p>
-            Somos una familia dedicada a la carne desde hace más de cuatro décadas.
-            Seleccionamos cada pieza con criterio, la trabajamos con respeto y la entregamos
-            en su mejor momento.
-          </p>
-          <p>
-            Cada proceso está pensado para asegurar sabor, frescura y confianza: desde la selección del origen
-            hasta la entrega final a la mesa de nuestros clientes.
-          </p>
-        </div>
+            <p>
+              Lo que comenzó hace más de cuatro décadas con un humilde emprendimiento familiar, hoy se consolida como una marca de referencia en calidad, servicio y tradición.
+            </p>
 
-        <div className="stats">
-          {stats.map((stat) => (
-            <div key={stat.label} className="stat-item">
-              <strong>{stat.value}</strong>
-              <span>{stat.label}</span>
+            <div className="metrics">
+              {stats.map((stat) => (
+                <div key={stat.label} className="metric-item">
+                  <strong>{stat.value}</strong>
+                  <span>{stat.label}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div className="about-carousel" aria-label="Galería de la carnicería">
+            <div className="carousel-window">
+              <div
+                className="carousel-track"
+                style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+              >
+                {slides.map((slide) => (
+                  <div key={slide.alt} className="carousel-slide">
+                    <img src={slide.image} alt={slide.alt} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="carousel-nav">
+              <button type="button" aria-label="Anterior imagen" onClick={goToPrevious}>
+                ‹
+              </button>
+              <button type="button" aria-label="Siguiente imagen" onClick={goToNext}>
+                ›
+              </button>
+            </div>
+
+            <div className="carousel-dots" aria-label="Seleccionar imagen">
+              {slides.map((slide, index) => (
+                <button
+                  key={slide.alt}
+                  type="button"
+                  className={index === activeSlide ? 'active' : ''}
+                  aria-label={`Ir a la imagen ${index + 1}`}
+                  onClick={() => setActiveSlide(index)}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="quote">
-        <p>“Saber elegir, saber servir.”</p>
+      <section className="about-quote">
+        <div className="about-quote__inner">
+          <p className="quote-tag">Nuestra pasión cruda</p>
+          <h2>Saber elegir, saber servir</h2>
+          <p>
+            La maduración perfecta y la trazabilidad de origen aseguran que cada bocado en tu mesa sea un testimonio vivo de la verdadera excelencia criolla.
+          </p>
+        </div>
       </section>
 
-      <section className="section values">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Lo que nos define</p>
-            <h2>Valorez con historia</h2>
-          </div>
+      <section className="about-values">
+        <div className="about-values__header">
+          <p className="eyebrow">Nuestros pilares</p>
+          <h2>Valores que sustentan nuestro trabajo</h2>
           <p>
-            Trabajamos todos los días para sostener una tradición basada en el rigor, la honestidad y el sabor.
+            En Reses S.R.L., no solo vendemos cortes de carne; honramos un estilo de vida que valora la procedencia, el servicio y la calidad en cada detalle.
           </p>
         </div>
 
         <div className="value-grid">
           {values.map((value) => (
-            <article key={value.number} className="value-card">
-              <strong>{value.number}</strong>
+            <article key={value.title} className="value-card">
+              <div className="value-card__icon">{value.icon}</div>
               <h3>{value.title}</h3>
               <p>{value.text}</p>
             </article>
           ))}
         </div>
       </section>
+
+      
     </main>
   )
 }

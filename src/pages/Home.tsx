@@ -39,7 +39,7 @@ const Home = () => {
               display: grid;
               place-items: center;
               background: #f4f4f4;
-              font-family: Arial, sans-serif;
+              font-family: Helvetica, Arial, sans-serif;
               color: #111;
             }
             .card {

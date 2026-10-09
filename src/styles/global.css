@@ -1,5 +1,5 @@
 /* Variables, reset y estilos globales de toda la aplicación. */
-:root { --red: #c92f24; --red-dark: #8e1f1a; --ink: #171514; --cream: #f4f0e9; --paper: #fffdf9; --muted: #756f68; --line: #ddd6cc; --display: 'Helvetica Neue', Helvetica, Arial, sans-serif; --body: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+:root { --red: #c92f24; --red-dark: #8e1f1a; --ink: #171514; --cream: #f4f0e9; --paper: #fffdf9; --muted: #756f68; --line: #ddd6cc; --display: Helvetica, Arial, sans-serif; --body: Helvetica, Arial, sans-serif; }
 *, *::before, *::after { box-sizing: border-box; }
 button, input, textarea { font: inherit; }
 button, a { cursor: pointer; }
@@ -100,7 +100,7 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
   font-size: clamp(2.7rem, 4vw, 4.2rem);
   line-height: 0.92;
   letter-spacing: -0.06em;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--body);
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -130,7 +130,7 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
 
 .metric-item strong {
   color: #d62a2a;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--body);
   font-size: clamp(1.8rem, 2.6vw, 2.8rem);
   line-height: 1;
   font-weight: 700;
@@ -256,7 +256,7 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
   line-height: 0.92;
   letter-spacing: -0.06em;
   text-transform: uppercase;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--body);
   font-weight: 700;
 }
 
@@ -307,7 +307,7 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
   line-height: 0.96;
   letter-spacing: -0.05em;
   text-transform: uppercase;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--body);
   font-weight: 700;
 }
 
@@ -334,7 +334,7 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
   font-size: clamp(2.2rem, 3vw, 4rem);
   line-height: 0.95;
   letter-spacing: -0.06em;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--body);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -382,7 +382,7 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
   font-size: clamp(1.6rem, 2vw, 2.2rem);
   line-height: 1.1;
   letter-spacing: -0.05em;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--body);
   font-weight: 700;
 }
 
@@ -1500,7 +1500,7 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
   --radius-md: 16px;
 
   position: relative;
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--body);
   color: var(--ink);
   background: var(--bg);
   line-height: 1.6;

@@ -62,7 +62,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             * { box-sizing: border-box; }
             body {
               margin: 0;
-              font-family: Arial, Helvetica, sans-serif;
+              font-family: Helvetica, Arial, sans-serif;
               background: var(--bg);
               color: var(--ink);
             }
@@ -93,7 +93,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               margin: 0 0 12px;
               font-size: clamp(2.2rem, 5vw, 4rem);
               line-height: 1;
-              font-family: Georgia, 'Times New Roman', serif;
+              font-family: Helvetica, Arial, sans-serif;
             }
             p {
               margin: 0;
@@ -266,7 +266,7 @@ export default function Footer({ onNavigate }: FooterProps) {
                 <div class="card preview-box">
                   <div>
                     <p class="eyebrow">Vista previa</p>
-                    <h2 style="margin:0; font-size:2rem; font-family: Georgia, 'Times New Roman', serif;">Tarjeta del producto</h2>
+                    <h2 style="margin:0; font-size:2rem; font-family: Helvetica, Arial, sans-serif;">Tarjeta del producto</h2>
                   </div>
                   <div class="product-card">
                     <div class="product-image"><img src="/img/carne1.jpeg" alt="Producto" /></div>

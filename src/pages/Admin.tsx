@@ -20,6 +20,7 @@ export default function Admin() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [imageError, setImageError] = useState('')
   const [saveError, setSaveError] = useState('')
+  const [deleteError, setDeleteError] = useState('')
   const [selectedImageName, setSelectedImageName] = useState('')
   const [imageLoading, setImageLoading] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
@@ -133,6 +134,28 @@ export default function Admin() {
     if (imageInputRef.current) imageInputRef.current.value = ''
   }
 
+  const handleDelete = (index: number, productName: string) => {
+    if (!window.confirm(`¿Eliminar "${productName}" del catálogo?`)) return
+
+    const nextCatalog = catalog.filter((_, productIndex) => productIndex !== index)
+
+    try {
+      saveProducts(nextCatalog)
+    } catch {
+      setDeleteError('No se pudo guardar el cambio en este navegador.')
+      return
+    }
+
+    setCatalog(nextCatalog)
+    setDeleteError('')
+
+    if (editingIndex === index) {
+      handleCancelEdit()
+    } else if (editingIndex !== null && editingIndex > index) {
+      setEditingIndex(editingIndex - 1)
+    }
+  }
+
   return (
     <main className="admin-page">
       <section className="admin-hero">
@@ -242,6 +265,7 @@ export default function Admin() {
         <div className="admin-list__header">
           <p className="eyebrow">Catálogo actual</p>
           <h2>Productos cargados</h2>
+          {deleteError && <small className="admin-image-error" role="alert">{deleteError}</small>}
         </div>
 
         <div className="productos-grid admin-grid">
@@ -266,9 +290,14 @@ export default function Admin() {
                   Consultar
                 </button>
 
-                <button type="button" className="admin-edit-button" onClick={() => handleEdit(index, product)}>
-                  Editar producto
-                </button>
+                <div className="admin-card-actions">
+                  <button type="button" className="admin-edit-button" onClick={() => handleEdit(index, product)}>
+                    Editar
+                  </button>
+                  <button type="button" className="admin-delete-button" onClick={() => handleDelete(index, product.name)}>
+                    Eliminar
+                  </button>
+                </div>
               </div>
             </article>
           ))}

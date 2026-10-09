@@ -21,7 +21,7 @@ function App() {
 
 	const Page = routes[path as keyof typeof routes] ?? routes['/']
 
-	return <><Header onNavigate={navigate} /><main><Page /></main><Footer /></>
+	return <><Header onNavigate={navigate} /><main><Page /></main><Footer onNavigate={navigate} /></>
 }
 
 export default App

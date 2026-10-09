@@ -28,9 +28,18 @@ const IconWhatsApp = () => (
   </svg>
 )
 
+type FooterProps = {
+  onNavigate?: (nextPath: string) => void
+}
+
 // Pie de página compartido con horarios y canales de contacto.
-export default function Footer() {
+export default function Footer({ onNavigate }: FooterProps) {
   const handleAdminOpen = () => {
+    if (onNavigate) {
+      onNavigate('/admin')
+      return
+    }
+
     const newWindow = window.open('about:blank', '_blank')
 
     if (!newWindow) return

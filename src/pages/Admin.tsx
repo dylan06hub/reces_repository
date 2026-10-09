@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
-import { products as initialProducts, type Product } from '../data/products'
+import type { Product } from '../data/products'
+import { loadProducts, saveProducts } from '../hooks/useProducts'
+
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024
 
 const defaultForm = {
   name: '',
@@ -12,8 +15,15 @@ const defaultForm = {
 }
 
 export default function Admin() {
-  const [catalog, setCatalog] = useState<Product[]>(initialProducts)
+  const [catalog, setCatalog] = useState<Product[]>(loadProducts)
   const [form, setForm] = useState(defaultForm)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [imageError, setImageError] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [selectedImageName, setSelectedImageName] = useState('')
+  const [imageLoading, setImageLoading] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = event.target
@@ -23,6 +33,46 @@ export default function Admin() {
       ...current,
       [name]: type === 'checkbox' ? checked : value,
     }))
+
+    if (name === 'image') {
+      setSelectedImageName('')
+      if (imageInputRef.current) imageInputRef.current.value = ''
+    }
+  }
+
+  const handleImageSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      setImageError('Seleccioná un archivo de imagen válido.')
+      event.target.value = ''
+      return
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      setImageError('La imagen debe pesar menos de 2 MB.')
+      event.target.value = ''
+      return
+    }
+
+    setImageError('')
+    setSelectedImageName(file.name)
+    setImageLoading(true)
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setForm((current) => ({ ...current, image: reader.result as string }))
+      }
+      setImageLoading(false)
+    }
+    reader.onerror = () => {
+      setImageError('No se pudo cargar la imagen. Intentá con otro archivo.')
+      setSelectedImageName('')
+      setImageLoading(false)
+    }
+    reader.readAsDataURL(file)
   }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -34,10 +84,53 @@ export default function Admin() {
       previousPrice: form.previousPrice ? Number(form.previousPrice) : undefined,
       image: form.image.trim() || '/img/carne1.jpeg',
       offer: form.offer,
+      description: form.description.trim() || 'Corte seleccionado',
     }
 
-    setCatalog((current) => [nextProduct, ...current])
+    const nextCatalog = editingIndex === null
+      ? [nextProduct, ...catalog]
+      : catalog.map((product, index) => index === editingIndex ? nextProduct : product)
+
+    try {
+      saveProducts(nextCatalog)
+    } catch {
+      setSaveError('No se pudo guardar el catálogo en este navegador. Probá con una imagen más liviana.')
+      return
+    }
+
+    setCatalog(nextCatalog)
     setForm(defaultForm)
+    setEditingIndex(null)
+    setImageError('')
+    setSaveError('')
+    setSelectedImageName('')
+    if (imageInputRef.current) imageInputRef.current.value = ''
+  }
+
+  const handleEdit = (index: number, product: Product) => {
+    setEditingIndex(index)
+    setImageError('')
+    setSaveError('')
+    setSelectedImageName('')
+    if (imageInputRef.current) imageInputRef.current.value = ''
+    setForm({
+      name: product.name,
+      price: String(product.price),
+      previousPrice: product.previousPrice ? String(product.previousPrice) : '',
+      image: product.image,
+      offer: Boolean(product.offer),
+      description: product.description || 'Corte seleccionado',
+    })
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null)
+    setForm(defaultForm)
+    setImageError('')
+    setSaveError('')
+    setSelectedImageName('')
+    if (imageInputRef.current) imageInputRef.current.value = ''
   }
 
   return (
@@ -45,7 +138,7 @@ export default function Admin() {
       <section className="admin-hero">
         <div className="admin-hero__content">
           <p className="eyebrow">Panel administrativo</p>
-          <h1>Cargar nuevo producto</h1>
+          <h1>{editingIndex === null ? 'Cargar nuevo producto' : 'Editar producto'}</h1>
           <p>
             Agregá cortes nuevos al catálogo para mantener tu sección de productos actualizada con la misma identidad visual de la marca.
           </p>
@@ -53,7 +146,7 @@ export default function Admin() {
       </section>
 
       <section className="admin-layout section">
-        <form className="admin-form" onSubmit={handleSubmit}>
+        <form ref={formRef} className="admin-form" onSubmit={handleSubmit}>
           <div className="form-row">
             <label>
               <span>Nombre</span>
@@ -70,10 +163,26 @@ export default function Admin() {
               <span>Precio anterior</span>
               <input name="previousPrice" type="number" value={form.previousPrice} onChange={handleChange} placeholder="18000" />
             </label>
-            <label>
-              <span>URL de imagen</span>
-              <input name="image" value={form.image} onChange={handleChange} placeholder="/img/carne1.jpeg" />
-            </label>
+            <div className="admin-image-field">
+              <label htmlFor="product-image-url">URL de imagen</label>
+              <div className="admin-image-field__controls">
+                <input id="product-image-url" name="image" value={form.image} onChange={handleChange} placeholder="/img/carne1.jpeg" />
+                <input
+                  ref={imageInputRef}
+                  className="admin-image-file-input"
+                  type="file"
+                  accept="image/*"
+                  aria-label="Seleccionar archivo de imagen"
+                  onChange={handleImageSelect}
+                />
+                <button type="button" className="admin-choose-image" onClick={() => imageInputRef.current?.click()}>
+                  Elegir imagen
+                </button>
+              </div>
+              {selectedImageName && <small>{selectedImageName}</small>}
+              {imageLoading && <small role="status">Cargando imagen...</small>}
+              {imageError && <small className="admin-image-error" role="alert">{imageError}</small>}
+            </div>
           </div>
 
           <label>
@@ -86,7 +195,17 @@ export default function Admin() {
             <span>Mostrar badge de oferta</span>
           </label>
 
-          <button type="submit" className="button">Guardar Producto</button>
+          <div className="admin-form__actions">
+            <button type="submit" className="button" disabled={imageLoading}>
+              {imageLoading ? 'Cargando imagen...' : editingIndex === null ? 'Agregar producto' : 'Guardar cambios'}
+            </button>
+            {editingIndex !== null && (
+              <button type="button" className="admin-cancel-button" onClick={handleCancelEdit}>
+                Cancelar
+              </button>
+            )}
+          </div>
+          {saveError && <small className="admin-image-error" role="alert">{saveError}</small>}
         </form>
 
         <div className="admin-preview">
@@ -126,8 +245,8 @@ export default function Admin() {
         </div>
 
         <div className="productos-grid admin-grid">
-          {catalog.map((product) => (
-            <article className="producto-card" key={`${product.name}-${product.price}`}>
+          {catalog.map((product, index) => (
+            <article className="producto-card" key={`${product.name}-${index}`}>
               <div className="producto-imagen">
                 <img src={product.image} alt={product.name} />
                 {product.offer && <span className="badge">OFERTA</span>}
@@ -135,7 +254,7 @@ export default function Admin() {
 
               <div className="producto-info">
                 <h3>{product.name}</h3>
-                <p className="producto-descripcion">Corte seleccionado</p>
+                <p className="producto-descripcion">{product.description || 'Corte seleccionado'}</p>
 
                 <div className="producto-precio">
                   {product.previousPrice && <del>${product.previousPrice.toLocaleString('es-AR')}</del>}
@@ -145,6 +264,10 @@ export default function Admin() {
 
                 <button type="button" className="producto-whatsapp">
                   Consultar
+                </button>
+
+                <button type="button" className="admin-edit-button" onClick={() => handleEdit(index, product)}>
+                  Editar producto
                 </button>
               </div>
             </article>

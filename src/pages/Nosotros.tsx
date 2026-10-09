@@ -22,24 +22,6 @@ const slides = [
   }
 ]
 
-const values = [
-  {
-    icon: '✦',
-    title: 'Calidad sin Compromisos',
-    text: 'Seleccionamos cortes premium con controles rigurosos para asegurar sabor, textura y consistencia en cada pieza. Cada animal pasa por criterios estrictos de elección y mantenimiento para garantizar una experiencia uniforme, sabrosa y confiable en cada compra.'
-  },
-  {
-    icon: '♡',
-    title: 'Tradición Familiar',
-    text: 'Mantener viva la historia del asado argentino y la atención cercana que distingue a nuestra familia. Valoramos el trato humano, la confianza de nuestros clientes y la forma en que el buen producto se comparte alrededor de la mesa.'
-  },
-  {
-    icon: '▣',
-    title: 'Cadena de Frío Express',
-    text: 'Nuestros envíos y entregas se realizan en condiciones ideales para preservar la frescura desde el origen hasta tu hogar. La temperatura, la rapidez y la responsabilidad con cada entrega son pilares fundamentales en la forma en que trabajamos.'
-  }
-]
-
 export default function Nosotros() {
   const [activeSlide, setActiveSlide] = useState(0)
 
@@ -140,29 +122,6 @@ export default function Nosotros() {
           </p>
         </div>
       </section>
-
-
-      <section className="about-values">
-        <div className="about-values__header">
-          <p className="eyebrow">Nuestros pilares</p>
-          <h2>Valores que sustentan nuestro trabajo</h2>
-          <p>
-            En Reses S.R.L., no solo vendemos cortes de carne; honramos un estilo de vida que valora la procedencia, el servicio y la calidad en cada detalle. Cada decisión que tomamos gira en torno a ofrecer una experiencia confiable para familias, parrilleros y amantes de la buena carne, con la atención que merece una tradición hecha con paciencia, respeto y amor por lo que hacemos.
-          </p>
-        </div>
-
-        <div className="value-grid">
-          {values.map((value) => (
-            <article key={value.title} className="value-card">
-              <div className="value-card__icon">{value.icon}</div>
-              <h3>{value.title}</h3>
-              <p>{value.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      
     </main>
   )
 }

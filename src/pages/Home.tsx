@@ -39,7 +39,7 @@ const Home = () => {
               display: grid;
               place-items: center;
               background: #f4f4f4;
-              font-family: Arial, sans-serif;
+              font-family: Helvetica, Arial, sans-serif;
               color: #111;
             }
             .card {
@@ -99,11 +99,11 @@ const Home = () => {
           {/* GRILLA DE PRODUCTOS */}
           <div className="productos-grid">
 
-            {products.map((product) => (
+            {products.map((product, index) => (
 
               <article
                 className="producto-card"
-                key={product.name}
+                key={`${product.name}-${index}`}
               >
 
                 {/* IMAGEN DEL PRODUCTO */}
@@ -131,7 +131,7 @@ const Home = () => {
                   </h3>
 
                   <p className="producto-descripcion">
-                    Corte seleccionado
+                    {product.description || 'Corte seleccionado'}
                   </p>
 
 

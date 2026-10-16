@@ -5,6 +5,7 @@ export type Product = {
   previousPrice?: number
   image: string
   offer?: boolean
+  description?: string
 }
 
 export const products: Product[] = [

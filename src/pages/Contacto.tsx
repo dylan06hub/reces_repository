@@ -43,8 +43,8 @@ export default function Contacto() {
     <section className="section contact-layout">
       <div>
         <p className="eyebrow">Contacto</p>
-        <h2>¿Que podemos preparar para vos?</h2>
-        <p>Escribinos y te respondemos a la brevedad.</p>
+        <h2>Escribinos</h2>
+        <p>Consultas, pedidos o lo que necesites. Te respondemos apenas podamos.</p>
         <div className="contact-details">
           <p><strong>Local Trelew</strong><br />Av. Eva Perón 1340, Reses</p>
           <p><strong>Local Rawson</strong><br />Av. Libertad 358, Superunion</p>

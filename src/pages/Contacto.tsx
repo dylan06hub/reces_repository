@@ -40,18 +40,11 @@ export default function Contacto() {
         </div>
       </div>
     </section>
-    <section className="section contact-layout">
+    <section className="section contact-layout contact-layout--stacked">
       <div>
         <p className="eyebrow">Contacto</p>
         <h2>Escribinos</h2>
         <p>Consultas, pedidos o lo que necesites. Te respondemos apenas podamos.</p>
-        <div className="contact-details">
-          <p><strong>Local Trelew</strong><br />Av. Eva Perón 1340, Reses</p>
-          <p><strong>Local Rawson</strong><br />Av. Libertad 358, Superunion</p>
-          <p><strong>Horarios</strong><br />Lunes a sabado, de 8:00 a 20:00</p>
-          <p><strong>Telefono Trelew</strong><br /><a href="tel:+54 9 280 483-1430">+54 9 280 483-1430</a></p>
-          <p><strong>Telefono Rawson</strong><br /><a href="tel:+54 9 280 501-3245">+54 9 280 501-3245</a></p>
-        </div>
       </div>
       <form className="contact-form" onSubmit={handleSubmit}>
         <div className="form-row">

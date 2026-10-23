@@ -1,5 +1,6 @@
 // Catálogo tipado de cortes, precios, ofertas e imágenes.
 export type Product = {
+  id?: number
   name: string
   price: number
   previousPrice?: number

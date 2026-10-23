@@ -6,7 +6,7 @@ import type { Product } from '../data/products'
 
 const STORAGE_KEY = 'reces-catalog'
 
-type ApiProducto = {
+export type ApiProducto = {
 	id: number
 	nombre: string
 	descripcion: string
@@ -20,7 +20,7 @@ type ApiProducto = {
 	creado_en: string
 }
 
-type Paginated<T> = {
+export type Paginated<T> = {
 	count: number
 	next: string | null
 	previous: string | null
@@ -28,6 +28,7 @@ type Paginated<T> = {
 }
 
 export const mapProducto = (producto: ApiProducto): Product => ({
+	id: producto.id,
 	name: producto.nombre,
 	price: Number(producto.precio),
 	previousPrice: producto.previousPrice ? Number(producto.previousPrice) : undefined,

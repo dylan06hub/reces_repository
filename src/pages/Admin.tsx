@@ -1,9 +1,9 @@
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
+import { apiFetch, clearTokens, getAccessToken, login } from '../api/client'
 import type { Product } from '../data/products'
-import { loadProducts, saveProducts } from '../hooks/useProducts'
-
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024
+import { mapProducto } from '../hooks/useProducts'
+import type { ApiProducto, Paginated } from '../hooks/useProducts'
 
 const defaultForm = {
   name: '',
@@ -15,16 +15,47 @@ const defaultForm = {
 }
 
 export default function Admin() {
-  const [catalog, setCatalog] = useState<Product[]>(loadProducts)
+  const [catalog, setCatalog] = useState<Product[]>([])
+  const [authenticated, setAuthenticated] = useState(() => Boolean(getAccessToken()))
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
   const [form, setForm] = useState(defaultForm)
-  const [editingIndex, setEditingIndex] = useState<number | null>(null)
-  const [imageError, setImageError] = useState('')
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [saveError, setSaveError] = useState('')
   const [deleteError, setDeleteError] = useState('')
-  const [selectedImageName, setSelectedImageName] = useState('')
-  const [imageLoading, setImageLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
-  const imageInputRef = useRef<HTMLInputElement>(null)
+
+  const loadCatalog = useCallback(async () => {
+    setLoading(true)
+    setSaveError('')
+
+    try {
+      let next: string | null = '/productos/'
+      const items: Product[] = []
+
+      while (next) {
+        const page: Paginated<ApiProducto> = await apiFetch<Paginated<ApiProducto>>(next)
+        items.push(...page.results.map(mapProducto))
+        next = page.next
+      }
+
+      setCatalog(items)
+    } catch {
+      setSaveError('No se pudo cargar el catálogo desde la API.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (authenticated) {
+      // oxlint-disable-next-line react/set-state-in-effect -- carga inicial desde la API
+      void loadCatalog()
+    }
+  }, [authenticated, loadCatalog])
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = event.target
@@ -34,86 +65,75 @@ export default function Admin() {
       ...current,
       [name]: type === 'checkbox' ? checked : value,
     }))
-
-    if (name === 'image') {
-      setSelectedImageName('')
-      if (imageInputRef.current) imageInputRef.current.value = ''
-    }
   }
 
-  const handleImageSelect = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    if (!file.type.startsWith('image/')) {
-      setImageError('Seleccioná un archivo de imagen válido.')
-      event.target.value = ''
-      return
-    }
-
-    if (file.size > MAX_IMAGE_SIZE) {
-      setImageError('La imagen debe pesar menos de 2 MB.')
-      event.target.value = ''
-      return
-    }
-
-    setImageError('')
-    setSelectedImageName(file.name)
-    setImageLoading(true)
-
-    const reader = new FileReader()
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setForm((current) => ({ ...current, image: reader.result as string }))
-      }
-      setImageLoading(false)
-    }
-    reader.onerror = () => {
-      setImageError('No se pudo cargar la imagen. Intentá con otro archivo.')
-      setSelectedImageName('')
-      setImageLoading(false)
-    }
-    reader.readAsDataURL(file)
-  }
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-
-    const nextProduct: Product = {
-      name: form.name.trim() || 'Nuevo producto',
-      price: Number(form.price) || 0,
-      previousPrice: form.previousPrice ? Number(form.previousPrice) : undefined,
-      image: form.image.trim() || '/img/carne1.jpeg',
-      offer: form.offer,
-      description: form.description.trim() || 'Corte seleccionado',
-    }
-
-    const nextCatalog = editingIndex === null
-      ? [nextProduct, ...catalog]
-      : catalog.map((product, index) => index === editingIndex ? nextProduct : product)
+    setLoginError('')
+    setSaving(true)
 
     try {
-      saveProducts(nextCatalog)
+      await login(username.trim(), password)
+      setAuthenticated(true)
+      setPassword('')
     } catch {
-      setSaveError('No se pudo guardar el catálogo en este navegador. Probá con una imagen más liviana.')
+      setLoginError('Usuario o contraseña incorrectos.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleLogout = () => {
+    clearTokens()
+    setAuthenticated(false)
+    setCatalog([])
+    setEditingId(null)
+    setForm(defaultForm)
+    setSaveError('')
+    setDeleteError('')
+  }
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setSaveError('')
+
+    if (form.image.trim().startsWith('data:')) {
+      setSaveError('Usá una URL de imagen; la subida de archivos todavía no está disponible.')
       return
     }
 
-    setCatalog(nextCatalog)
-    setForm(defaultForm)
-    setEditingIndex(null)
-    setImageError('')
-    setSaveError('')
-    setSelectedImageName('')
-    if (imageInputRef.current) imageInputRef.current.value = ''
+    const payload = {
+      nombre: form.name.trim() || 'Nuevo producto',
+      precio: Number(form.price) || 0,
+      previousPrice: form.previousPrice ? Number(form.previousPrice) : null,
+      offer: form.offer,
+      imagen: form.image.trim(),
+      descripcion: form.description.trim() || 'Corte seleccionado',
+    }
+
+    setSaving(true)
+
+    try {
+      await apiFetch(editingId === null ? '/productos/' : `/productos/${editingId}/`, {
+        method: editingId === null ? 'POST' : 'PATCH',
+        body: JSON.stringify(payload),
+      })
+
+      await loadCatalog()
+      setForm(defaultForm)
+      setEditingId(null)
+    } catch {
+      setSaveError('No se pudo guardar el producto. Revisá la sesión y los datos.')
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const handleEdit = (index: number, product: Product) => {
-    setEditingIndex(index)
-    setImageError('')
+  const handleEdit = (product: Product) => {
+    if (product.id === undefined) return
+
+    setEditingId(product.id)
     setSaveError('')
-    setSelectedImageName('')
-    if (imageInputRef.current) imageInputRef.current.value = ''
     setForm({
       name: product.name,
       price: String(product.price),
@@ -126,34 +146,76 @@ export default function Admin() {
   }
 
   const handleCancelEdit = () => {
-    setEditingIndex(null)
+    setEditingId(null)
     setForm(defaultForm)
-    setImageError('')
     setSaveError('')
-    setSelectedImageName('')
-    if (imageInputRef.current) imageInputRef.current.value = ''
   }
 
-  const handleDelete = (index: number, productName: string) => {
-    if (!window.confirm(`¿Eliminar "${productName}" del catálogo?`)) return
+  const handleDelete = async (product: Product) => {
+    if (product.id === undefined) return
+    if (!window.confirm(`¿Eliminar "${product.name}" del catálogo?`)) return
 
-    const nextCatalog = catalog.filter((_, productIndex) => productIndex !== index)
-
-    try {
-      saveProducts(nextCatalog)
-    } catch {
-      setDeleteError('No se pudo guardar el cambio en este navegador.')
-      return
-    }
-
-    setCatalog(nextCatalog)
     setDeleteError('')
 
-    if (editingIndex === index) {
-      handleCancelEdit()
-    } else if (editingIndex !== null && editingIndex > index) {
-      setEditingIndex(editingIndex - 1)
+    try {
+      await apiFetch(`/productos/${product.id}/`, { method: 'DELETE' })
+      await loadCatalog()
+
+      if (editingId === product.id) {
+        handleCancelEdit()
+      }
+    } catch {
+      setDeleteError('No se pudo eliminar el producto.')
     }
+  }
+
+  if (!authenticated) {
+    return (
+      <main className="admin-page">
+        <section className="admin-hero">
+          <div className="admin-hero__content">
+            <p className="eyebrow">Panel administrativo</p>
+            <h1>Iniciar sesión</h1>
+            <p>Ingresá con un usuario administrador para gestionar el catálogo.</p>
+          </div>
+        </section>
+
+        <section className="admin-layout section">
+          <form className="admin-form" onSubmit={handleLogin}>
+            <label>
+              <span>Usuario</span>
+              <input
+                name="username"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                autoComplete="username"
+                required
+              />
+            </label>
+
+            <label>
+              <span>Contraseña</span>
+              <input
+                name="password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                autoComplete="current-password"
+                required
+              />
+            </label>
+
+            <div className="admin-form__actions">
+              <button type="submit" className="button" disabled={saving}>
+                {saving ? 'Ingresando...' : 'Ingresar'}
+              </button>
+            </div>
+
+            {loginError && <small className="admin-image-error" role="alert">{loginError}</small>}
+          </form>
+        </section>
+      </main>
+    )
   }
 
   return (
@@ -161,10 +223,13 @@ export default function Admin() {
       <section className="admin-hero">
         <div className="admin-hero__content">
           <p className="eyebrow">Panel administrativo</p>
-          <h1>{editingIndex === null ? 'Cargar nuevo producto' : 'Editar producto'}</h1>
+          <h1>{editingId === null ? 'Cargar nuevo producto' : 'Editar producto'}</h1>
           <p>
             Agregá cortes nuevos al catálogo para mantener tu sección de productos actualizada con la misma identidad visual de la marca.
           </p>
+          <button type="button" className="button" onClick={handleLogout}>
+            Cerrar sesión
+          </button>
         </div>
       </section>
 
@@ -186,26 +251,10 @@ export default function Admin() {
               <span>Precio anterior</span>
               <input name="previousPrice" type="number" value={form.previousPrice} onChange={handleChange} placeholder="18000" />
             </label>
-            <div className="admin-image-field">
-              <label htmlFor="product-image-url">URL de imagen</label>
-              <div className="admin-image-field__controls">
-                <input id="product-image-url" name="image" value={form.image} onChange={handleChange} placeholder="/img/carne1.jpeg" />
-                <input
-                  ref={imageInputRef}
-                  className="admin-image-file-input"
-                  type="file"
-                  accept="image/*"
-                  aria-label="Seleccionar archivo de imagen"
-                  onChange={handleImageSelect}
-                />
-                <button type="button" className="admin-choose-image" onClick={() => imageInputRef.current?.click()}>
-                  Elegir imagen
-                </button>
-              </div>
-              {selectedImageName && <small>{selectedImageName}</small>}
-              {imageLoading && <small role="status">Cargando imagen...</small>}
-              {imageError && <small className="admin-image-error" role="alert">{imageError}</small>}
-            </div>
+            <label>
+              <span>URL de imagen</span>
+              <input name="image" value={form.image} onChange={handleChange} placeholder="/img/carne1.jpeg" />
+            </label>
           </div>
 
           <label>
@@ -219,10 +268,10 @@ export default function Admin() {
           </label>
 
           <div className="admin-form__actions">
-            <button type="submit" className="button" disabled={imageLoading}>
-              {imageLoading ? 'Cargando imagen...' : editingIndex === null ? 'Agregar producto' : 'Guardar cambios'}
+            <button type="submit" className="button" disabled={saving}>
+              {saving ? 'Guardando...' : editingId === null ? 'Agregar producto' : 'Guardar cambios'}
             </button>
-            {editingIndex !== null && (
+            {editingId !== null && (
               <button type="button" className="admin-cancel-button" onClick={handleCancelEdit}>
                 Cancelar
               </button>
@@ -265,12 +314,13 @@ export default function Admin() {
         <div className="admin-list__header">
           <p className="eyebrow">Catálogo actual</p>
           <h2>Productos cargados</h2>
+          {loading && <small role="status">Cargando catálogo...</small>}
           {deleteError && <small className="admin-image-error" role="alert">{deleteError}</small>}
         </div>
 
         <div className="productos-grid admin-grid">
           {catalog.map((product, index) => (
-            <article className="producto-card" key={`${product.name}-${index}`}>
+            <article className="producto-card" key={product.id ?? `${product.name}-${index}`}>
               <div className="producto-imagen">
                 <img src={product.image} alt={product.name} />
                 {product.offer && <span className="badge">OFERTA</span>}
@@ -291,10 +341,10 @@ export default function Admin() {
                 </button>
 
                 <div className="admin-card-actions">
-                  <button type="button" className="admin-edit-button" onClick={() => handleEdit(index, product)}>
+                  <button type="button" className="admin-edit-button" onClick={() => handleEdit(product)}>
                     Editar
                   </button>
-                  <button type="button" className="admin-delete-button" onClick={() => handleDelete(index, product.name)}>
+                  <button type="button" className="admin-delete-button" onClick={() => handleDelete(product)}>
                     Eliminar
                   </button>
                 </div>

@@ -1,9 +1,36 @@
 // Hook de acceso al catálogo de productos.
 import { useEffect, useState } from 'react'
+import { apiFetch } from '../api/client'
 import { products } from '../data/products'
 import type { Product } from '../data/products'
 
 const STORAGE_KEY = 'reces-catalog'
+
+type ApiProducto = {
+	id: number
+	nombre: string
+	descripcion: string
+	precio: string
+	stock: number
+	categoria: string
+	imagen: string
+	activo: boolean
+	creado_en: string
+}
+
+type Paginated<T> = {
+	count: number
+	next: string | null
+	previous: string | null
+	results: T[]
+}
+
+export const mapProducto = (producto: ApiProducto): Product => ({
+	name: producto.nombre,
+	price: Number(producto.precio),
+	image: producto.imagen || '/img/carne1.jpeg',
+	description: producto.descripcion || 'Corte seleccionado',
+})
 
 export const loadProducts = (): Product[] => {
 	try {
@@ -22,12 +49,22 @@ export const saveProducts = (catalog: Product[]) => {
 }
 
 export const useProducts = () => {
-	const [catalog, setCatalog] = useState(loadProducts)
+	const [catalog, setCatalog] = useState<Product[]>([])
 
 	useEffect(() => {
-		const syncCatalog = () => setCatalog(loadProducts())
-		window.addEventListener('storage', syncCatalog)
-		return () => window.removeEventListener('storage', syncCatalog)
+		let cancelled = false
+
+		apiFetch<Paginated<ApiProducto>>('/productos/')
+			.then((response) => {
+				if (!cancelled) setCatalog(response.results.map(mapProducto))
+			})
+			.catch(() => {
+				if (!cancelled) setCatalog(loadProducts())
+			})
+
+		return () => {
+			cancelled = true
+		}
 	}, [])
 
 	return catalog

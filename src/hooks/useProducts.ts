@@ -11,6 +11,8 @@ type ApiProducto = {
 	nombre: string
 	descripcion: string
 	precio: string
+	previousPrice: string | null
+	offer: boolean
 	stock: number
 	categoria: string
 	imagen: string
@@ -28,6 +30,8 @@ type Paginated<T> = {
 export const mapProducto = (producto: ApiProducto): Product => ({
 	name: producto.nombre,
 	price: Number(producto.precio),
+	previousPrice: producto.previousPrice ? Number(producto.previousPrice) : undefined,
+	offer: producto.offer,
 	image: producto.imagen || '/img/carne1.jpeg',
 	description: producto.descripcion || 'Corte seleccionado',
 })

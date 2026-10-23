@@ -3,11 +3,11 @@ import { useContactForm } from '../hooks/useContactForm'
 import Input from '../components/Input'
 
 export default function Contacto() {
-  const { sent, error, submit } = useContactForm()
+  const { sent, sending, error, submit } = useContactForm()
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    submit(new FormData(event.currentTarget))
+    void submit(new FormData(event.currentTarget))
   }
 
   return <>
@@ -55,7 +55,9 @@ export default function Contacto() {
         <textarea name="comentario" placeholder="Tu consulta" aria-label="Tu consulta" rows={5} required />
         {error && <p className="form-message form-message--error" role="alert">{error}</p>}
         {sent && <p className="form-message form-message--success" role="status">Mensaje enviado. Gracias por escribirnos.</p>}
-        <button className="button" type="submit">{sent ? 'Enviar otra consulta' : 'Enviar mensaje'}</button>
+        <button className="button" type="submit" disabled={sending}>
+          {sending ? 'Enviando...' : sent ? 'Enviar otra consulta' : 'Enviar mensaje'}
+        </button>
       </form>
     </section>
   </>

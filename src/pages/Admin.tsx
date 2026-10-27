@@ -27,6 +27,9 @@ export default function Admin() {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>(defaultForm.image)
 
   const loadCatalog = useCallback(async () => {
     setLoading(true)
@@ -67,6 +70,21 @@ export default function Admin() {
     }))
   }
 
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) {
+      setImageFile(null)
+      setImagePreview(form.image)
+      return
+    }
+    setImageFile(file)
+    const reader = new FileReader()
+    reader.onload = () => {
+      setImagePreview(typeof reader.result === 'string' ? reader.result : form.image)
+    }
+    reader.readAsDataURL(file)
+  }
+
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoginError('')
@@ -97,30 +115,55 @@ export default function Admin() {
     event.preventDefault()
     setSaveError('')
 
-    if (form.image.trim().startsWith('data:')) {
-      setSaveError('Usá una URL de imagen; la subida de archivos todavía no está disponible.')
+    const imageValue = form.image.trim()
+    if (imageValue.startsWith('data:')) {
+      setSaveError('Seleccioná un archivo desde el campo de imagen.')
       return
     }
 
-    const payload = {
-      nombre: form.name.trim() || 'Nuevo producto',
-      precio: Number(form.price) || 0,
-      previousPrice: form.previousPrice ? Number(form.previousPrice) : null,
-      offer: form.offer,
-      imagen: form.image.trim(),
-      descripcion: form.description.trim() || 'Corte seleccionado',
+    const isFile = imageValue.startsWith('file://')
+    if (isFile) {
+      setSaveError('Seleccioná un archivo desde el campo de imagen.')
+      return
     }
 
     setSaving(true)
 
     try {
-      await apiFetch(editingId === null ? '/productos/' : `/productos/${editingId}/`, {
-        method: editingId === null ? 'POST' : 'PATCH',
-        body: JSON.stringify(payload),
-      })
+      if (imageFile) {
+        const formData = new FormData()
+        formData.append('nombre', form.name.trim() || 'Nuevo producto')
+        formData.append('precio', String(Number(form.price) || 0))
+        if (form.previousPrice) formData.append('previousPrice', String(Number(form.previousPrice)))
+        formData.append('offer', String(form.offer))
+        formData.append('descripcion', form.description.trim() || 'Corte seleccionado')
+        formData.append('imagen_upload', imageFile)
+
+        await apiFetch(editingId === null ? '/productos/' : `/productos/${editingId}/`, {
+          method: editingId === null ? 'POST' : 'PATCH',
+          body: formData,
+        })
+      } else {
+        const payload = {
+          nombre: form.name.trim() || 'Nuevo producto',
+          precio: Number(form.price) || 0,
+          previousPrice: form.previousPrice ? Number(form.previousPrice) : null,
+          offer: form.offer,
+          imagen: imageValue || '',
+          descripcion: form.description.trim() || 'Corte seleccionado',
+        }
+
+        await apiFetch(editingId === null ? '/productos/' : `/productos/${editingId}/`, {
+          method: editingId === null ? 'POST' : 'PATCH',
+          body: JSON.stringify(payload),
+        })
+      }
 
       await loadCatalog()
       setForm(defaultForm)
+      setImageFile(null)
+      setImagePreview(defaultForm.image)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       setEditingId(null)
     } catch {
       setSaveError('No se pudo guardar el producto. Revisá la sesión y los datos.')
@@ -134,6 +177,8 @@ export default function Admin() {
 
     setEditingId(product.id)
     setSaveError('')
+    setImageFile(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
     setForm({
       name: product.name,
       price: String(product.price),
@@ -142,12 +187,16 @@ export default function Admin() {
       offer: Boolean(product.offer),
       description: product.description || 'Corte seleccionado',
     })
+    setImagePreview(product.image || defaultForm.image)
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
   const handleCancelEdit = () => {
     setEditingId(null)
     setForm(defaultForm)
+    setImageFile(null)
+    setImagePreview(defaultForm.image)
+    if (fileInputRef.current) fileInputRef.current.value = ''
     setSaveError('')
   }
 
@@ -252,9 +301,16 @@ export default function Admin() {
               <input name="previousPrice" type="number" value={form.previousPrice} onChange={handleChange} placeholder="18000" />
             </label>
             <label>
-              <span>URL de imagen</span>
-              <input name="image" value={form.image} onChange={handleChange} placeholder="/img/carne1.jpeg" />
+              <span>Subir imagen (archivo)</span>
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} />
             </label>
+            <label>
+              <span>URL de imagen (opcional)</span>
+              <input name="image" value={form.image} onChange={handleChange} placeholder="/img/carne1.jpeg o https://..." />
+            </label>
+            <div className="producto-imagen" style={{ maxWidth: '200px' }}>
+              <img src={imagePreview} alt="Vista previa" />
+            </div>
           </div>
 
           <label>

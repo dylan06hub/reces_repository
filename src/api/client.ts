@@ -22,16 +22,27 @@ const saveTokens = (tokens: Tokens) => {
 
 const request = (path: string, options: RequestInit, token: string | null) => {
   const url = path.startsWith('http') ? path : `${API_URL}${path}`
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
+
+  const headers: Record<string, string> = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...((options.headers as Record<string, string>) || {}),
+  }
+
+  if (!isFormData && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json'
+  }
+
+  if (isFormData) {
+    delete headers['Content-Type']
+  }
 
   return fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
+    headers,
   })
 }
+
 
 const refreshAccessToken = async () => {
   const refresh = window.localStorage.getItem(REFRESH_KEY)

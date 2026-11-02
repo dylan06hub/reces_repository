@@ -1,27 +1,20 @@
-// Contenedor principal: selecciona la página actual y monta el layout global.
-import { useEffect, useState } from 'react'
+// Contenedor principal con navegación y layout compartidos.
+import { useEffect } from 'react'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import { routes } from './router'
 
 function App() {
-	const [path, setPath] = useState(window.location.pathname)
+  const { pathname } = useLocation()
 
-	useEffect(() => {
-		const handlePopState = () => setPath(window.location.pathname)
-		window.addEventListener('popstate', handlePopState)
-		return () => window.removeEventListener('popstate', handlePopState)
-	}, [])
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [pathname])
 
-	const navigate = (nextPath: string) => {
-		window.history.pushState({}, '', nextPath)
-		setPath(nextPath)
-		window.scrollTo({ top: 0, behavior: 'smooth' })
-	}
-
-	const Page = routes[path as keyof typeof routes] ?? routes['/']
-
-	return <><Header onNavigate={navigate} /><main><Page /></main><Footer onNavigate={navigate} /></>
+  return <><Header /><main><Routes>
+    {Object.entries(routes).map(([path, Page]) => <Route key={path} path={path} element={<Page />} />)}
+  </Routes></main><Footer /></>
 }
 
 export default App

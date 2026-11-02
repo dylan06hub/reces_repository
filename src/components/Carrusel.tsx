@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 
 const slides = [
@@ -79,12 +80,12 @@ const Carrusel = () => {
               Ver Todos los Cortes
             </a>
 
-            <a
-              href="#contacto"
+            <Link
+              to="/contacto"
               className="carrusel-boton carrusel-boton-secundario"
             >
               ↑ Sucursal Más Cercana
-            </a>
+            </Link>
 
           </div>
 

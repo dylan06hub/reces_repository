@@ -3,5 +3,6 @@ import Admin from './pages/Admin'
 import Contacto from './pages/Contacto'
 import Home from './pages/Home'
 import Nosotros from './pages/Nosotros'
+import NotFound from './pages/NotFound'
 
-export const routes = { '/': Home, '/nosotros': Nosotros, '/contacto': Contacto, '/admin': Admin }
+export const routes = { '/': Home, '/nosotros': Nosotros, '/contacto': Contacto, '/admin': Admin, '*': NotFound }

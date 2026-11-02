@@ -1,18 +1,7 @@
 import { Link } from 'react-router-dom';
 import SearchBar from './SearchBar';
 
-type HeaderProps = {
-  onNavigate?: (nextPath: string) => void;
-};
-
-const Header = ({ onNavigate }: HeaderProps) => {
-  const handleNavigate = (path: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    onNavigate?.(path);
-    window.history.pushState({}, '', path);
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  };
-
+const Header = () => {
   return (
     <header className="header">
       <div className="header-left">
@@ -27,19 +16,19 @@ const Header = ({ onNavigate }: HeaderProps) => {
       <nav>
         <ul className="nav-links">
           <li>
-            <Link to="/" onClick={handleNavigate('/')}>
+            <Link to="/">
               Inicio
             </Link>
           </li>
 
           <li>
-            <Link to="/nosotros" onClick={handleNavigate('/nosotros')}>
+            <Link to="/nosotros">
               Nosotros
             </Link>
           </li>
 
           <li>
-            <Link to="/contacto" onClick={handleNavigate('/contacto')}>
+            <Link to="/contacto">
               Contacto
             </Link>
           </li>

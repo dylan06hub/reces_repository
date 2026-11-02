@@ -1,3 +1,5 @@
+import { useSucursales } from '../hooks/useSucursales'
+
 const IconMapPin = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M12 21s6-5.686 6-11a6 6 0 1 0-12 0c0 5.314 6 11 6 11Zm0-8.2a2.8 2.8 0 1 1 0-5.6 2.8 2.8 0 0 1 0 5.6Z" fill="currentColor" />
@@ -34,6 +36,9 @@ type FooterProps = {
 
 // Pie de página compartido con horarios y canales de contacto.
 export default function Footer({ onNavigate }: FooterProps) {
+  const { sucursales, loading, error } = useSucursales()
+  const sucursalesStatus = loading ? 'Cargando sucursales y horarios...'
+    : error || (sucursales.length === 0 ? 'Próximamente publicaremos nuestras sucursales y horarios.' : '')
   const handleAdminOpen = () => {
     if (onNavigate) {
       onNavigate('/admin')
@@ -319,39 +324,33 @@ export default function Footer({ onNavigate }: FooterProps) {
 
         <div className="site-footer__column">
           <h3>CONTACTO</h3>
-          <div className="footer-contact-item">
-            <span className="footer-icon">
-              <IconMapPin />
-            </span>
-            <p>Eva Perón 1340, Trelew-Chubut</p>
-          </div>
-          <div className="footer-contact-item">
-            <span className="footer-icon">
-              <IconPhone />
-            </span>
-            <p>Por mayor: 2808431430</p>
-          </div>
-          <div className="footer-contact-item">
-            <span className="footer-icon">
-              <IconPhone />
-            </span>
-            <p>Por menor: 2805013245</p>
-          </div>
+          {sucursalesStatus && <p role={error ? 'alert' : 'status'}>{sucursalesStatus}</p>}
+          {sucursales.map(sucursal => (
+            <div key={sucursal.id}>
+              <div className="footer-contact-item">
+                <span className="footer-icon"><IconMapPin /></span>
+                <p><strong>{sucursal.nombre}</strong><br />{sucursal.direccion}, {sucursal.ciudad}</p>
+              </div>
+              {sucursal.telefono && (
+                <div className="footer-contact-item">
+                  <span className="footer-icon"><IconPhone /></span>
+                  <p>{sucursal.telefono}</p>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
 
         <div className="site-footer__column">
           <h3>HORARIOS DE ATENCIÓN</h3>
           <div className="footer-hours">
-            <p>
-              <strong>Lunes a Sábados en Trelew:</strong>
-            </p>
-            <p>Invierno: 9:00 a 13:00 - 17:00 a 21:00</p>
-            <p>Verano: 9:00 a 13:00 - 16:30 a 20:30</p>
-            <p>
-              <strong>Lunes a Domingos en Rawson:</strong>
-            </p>
-            <p>Invierno: 9:00 a 13:00 - 17:00 a 21:00</p>
-            <p>Verano: 9:00 a 13:00 - 16:30 a 20:30</p>
+            {sucursalesStatus && <p>{sucursalesStatus}</p>}
+            {sucursales.map(sucursal => (
+              <p key={sucursal.id}>
+                <strong>{sucursal.nombre} ({sucursal.ciudad}):</strong><br />
+                {sucursal.horario || 'Horario no informado.'}
+              </p>
+            ))}
           </div>
         </div>
 

@@ -1,9 +1,11 @@
 // Pagina de contacto con informacion del local y formulario de consultas.
 import { useContactForm } from '../hooks/useContactForm'
 import Input from '../components/Input'
+import { useSucursales } from '../hooks/useSucursales'
 
 export default function Contacto() {
   const { sent, sending, error, submit } = useContactForm()
+  const { sucursales, loading, error: sucursalesError } = useSucursales()
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -24,20 +26,21 @@ export default function Contacto() {
 
         <div className="contact-hours-banner__divider" />
 
-        <div className="contact-hours-banner__row">
-          <span>Lunes a Sábados (Trelew):</span>
-          <strong>09:00 - 13:00 | 17:00 - 21:00</strong>
-        </div>
-
-        <div className="contact-hours-banner__row">
-          <span>Lunes a Domingos y Feriados provinciales (Rawson):</span>
-          <strong>08:30 - 13:30 | 17:00 - 21:00</strong>
-        </div>
-
-        <div className="contact-hours-banner__row contact-hours-banner__row--compact">
-          <span>Feriados nacionales:</span>
-          <strong>09:00 - 13:00 (Solo Rawson)</strong>
-        </div>
+        {loading && <p role="status">Cargando sucursales y horarios...</p>}
+        {sucursalesError && <p role="alert">{sucursalesError}</p>}
+        {!loading && !sucursalesError && sucursales.length === 0 && (
+          <p role="status">Próximamente publicaremos nuestras sucursales y horarios.</p>
+        )}
+        {sucursales.map(sucursal => (
+          <div className="contact-hours-banner__row" key={sucursal.id}>
+            <span>
+              {sucursal.nombre} ({sucursal.ciudad})<br />
+              {sucursal.direccion}
+              {sucursal.telefono && <><br />Teléfono: {sucursal.telefono}</>}
+            </span>
+            <strong>{sucursal.horario || 'Horario no informado.'}</strong>
+          </div>
+        ))}
       </div>
     </section>
     <section className="section contact-layout contact-layout--stacked">

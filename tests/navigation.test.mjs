@@ -65,3 +65,17 @@ test('los enlaces internos apuntan a las rutas reales y una ruta desconocida mue
     assert.match(missing, /href="\/"[^>]*>Volver al inicio/)
   } finally { router.dispose() }
 })
+
+test('la URL conserva la búsqueda en el campo al navegar y al volver', async () => {
+  const router = makeRouter()
+  try {
+    await router.navigate('/?buscar=Vac%C3%ADo')
+    assert.match(render(router), /type="search"[^>]*value="Vacío"/)
+    await router.navigate('/contacto')
+    assert.match(render(router), /type="search"[^>]*value=""/)
+    await router.navigate(-1)
+    assert.match(render(router), /type="search"[^>]*value="Vacío"/)
+    await router.navigate('/', { replace: true })
+    assert.match(render(router), /type="search"[^>]*value=""/)
+  } finally { router.dispose() }
+})

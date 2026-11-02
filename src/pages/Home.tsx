@@ -1,5 +1,7 @@
 // Página inicial con carrusel, catálogo y garantía de calidad.
 
+import { useSearchParams } from 'react-router-dom'
+import { filterProducts } from '../utils/filterProducts'
 import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 import { getWhatsAppUrl } from '../utils/whatsapp'
@@ -21,7 +23,9 @@ const MessageIcon = () => (
 )
 
 const Home = () => {
-  const { catalog: products, loading, error, reload } = useProducts()
+  const { catalog, loading, error, reload } = useProducts()
+  const [params] = useSearchParams()
+  const products = filterProducts(catalog, params.get('buscar') ?? '')
 
   const handleWhatsappConsult = (productName: string) => {
     window.open(getWhatsAppUrl(productName), '_blank', 'noopener,noreferrer')
@@ -58,8 +62,11 @@ const Home = () => {
 
           <div className="catalog-status" role="status" aria-live="polite">
             {loading && <p>Cargando productos...</p>}
-            {!loading && !error && products.length === 0 && (
+            {!loading && !error && catalog.length === 0 && (
               <p>Por el momento no hay productos disponibles.</p>
+            )}
+            {!loading && !error && catalog.length > 0 && products.length === 0 && (
+              <p>No encontramos cortes con ese nombre. Probá con otra búsqueda.</p>
             )}
           </div>
           {error && (

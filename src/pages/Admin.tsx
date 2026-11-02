@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
-import { apiFetch, clearTokens, getAccessToken, login } from '../api/client'
+import { apiFetch, clearTokens, getAccessToken, login, SESSION_ENDED_EVENT } from '../api/client'
 import type { Product } from '../data/products'
 import { mapProducto } from '../hooks/useProducts'
 import type { ApiProducto, Paginated } from '../hooks/useProducts'
@@ -30,6 +30,21 @@ export default function Admin() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string>(defaultForm.image)
+
+  useEffect(() => {
+    const onSessionEnded = () => {
+      setAuthenticated(false)
+      setCatalog([])
+      setPassword('')
+      setEditingId(null)
+      setForm(defaultForm)
+      setImageFile(null)
+      setImagePreview(defaultForm.image)
+      setLoginError('La sesión terminó. Ingresá nuevamente.')
+    }
+    window.addEventListener(SESSION_ENDED_EVENT, onSessionEnded)
+    return () => window.removeEventListener(SESSION_ENDED_EVENT, onSessionEnded)
+  }, [])
 
   const loadCatalog = useCallback(async () => {
     setLoading(true)
@@ -109,6 +124,7 @@ export default function Admin() {
     setForm(defaultForm)
     setSaveError('')
     setDeleteError('')
+    setLoginError('')
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

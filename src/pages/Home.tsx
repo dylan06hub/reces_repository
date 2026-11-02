@@ -20,7 +20,7 @@ const MessageIcon = () => (
 )
 
 const Home = () => {
-  const products = useProducts()
+  const { catalog: products, loading, error, reload } = useProducts()
 
   const handleWhatsappConsult = (productName: string) => {
     const newWindow = window.open('about:blank', '_blank')
@@ -96,8 +96,21 @@ const Home = () => {
           </div>
 
 
+          <div className="catalog-status" role="status" aria-live="polite">
+            {loading && <p>Cargando productos...</p>}
+            {!loading && !error && products.length === 0 && (
+              <p>Por el momento no hay productos disponibles.</p>
+            )}
+          </div>
+          {error && (
+            <div className="catalog-status">
+              <p className="form-message form-message--error" role="alert">{error}</p>
+              <button type="button" className="button" onClick={reload}>Reintentar</button>
+            </div>
+          )}
+
           {/* GRILLA DE PRODUCTOS */}
-          <div className="productos-grid">
+          <div className="productos-grid" aria-busy={loading}>
 
             {products.map((product, index) => (
 

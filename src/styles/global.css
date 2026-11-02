@@ -1981,3 +1981,14 @@ body { background: var(--paper); } button { border: 0; background: none; } a { c
     grid-template-columns: 1fr;
   }
 }
+.catalog-status {
+  text-align: center;
+}
+
+.catalog-status:empty {
+  display: none;
+}
+
+.catalog-status .button {
+  margin-top: 1rem;
+}

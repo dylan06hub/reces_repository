@@ -1,10 +1,7 @@
 // Hook de acceso al catálogo de productos.
 import { useEffect, useState } from 'react'
 import { apiFetch } from '../api/client'
-import { products } from '../data/products'
 import type { Product } from '../data/products'
-
-const STORAGE_KEY = 'reces-catalog'
 
 export type ApiProducto = {
 	id: number
@@ -15,7 +12,7 @@ export type ApiProducto = {
 	offer: boolean
 	stock: number
 	categoria: string
-	imagen: string
+	imagen: string | null
 	activo: boolean
 	creado_en: string
 }
@@ -37,40 +34,50 @@ export const mapProducto = (producto: ApiProducto): Product => ({
 	description: producto.descripcion || 'Corte seleccionado',
 })
 
-export const loadProducts = (): Product[] => {
-	try {
-		const savedProducts = window.localStorage.getItem(STORAGE_KEY)
-		if (!savedProducts) return products
+export const loadProducts = async (signal?: AbortSignal): Promise<Product[]> => {
+	// La página pública muestra activos incluso si hay una sesión staff abierta.
+	let next: string | null = '/productos/?activo=true'
+	const catalog: Product[] = []
 
-		const parsedProducts: unknown = JSON.parse(savedProducts)
-		return Array.isArray(parsedProducts) ? parsedProducts as Product[] : products
-	} catch {
-		return products
+	while (next) {
+		signal?.throwIfAborted()
+		const page: Paginated<ApiProducto> = await apiFetch<Paginated<ApiProducto>>(next, { signal })
+		catalog.push(...page.results.map(mapProducto))
+		next = page.next
 	}
-}
 
-export const saveProducts = (catalog: Product[]) => {
-	window.localStorage.setItem(STORAGE_KEY, JSON.stringify(catalog))
+	return catalog
 }
 
 export const useProducts = () => {
-	const [catalog, setCatalog] = useState<Product[]>([])
+	const [state, setState] = useState({
+		catalog: [] as Product[],
+		loading: true,
+		error: '',
+	})
+	const [attempt, setAttempt] = useState(0)
+
+	const reload = () => {
+		setState({ catalog: [], loading: true, error: '' })
+		setAttempt(current => current + 1)
+	}
 
 	useEffect(() => {
-		let cancelled = false
+		const controller = new AbortController()
 
-		apiFetch<Paginated<ApiProducto>>('/productos/')
-			.then((response) => {
-				if (!cancelled) setCatalog(response.results.map(mapProducto))
+		loadProducts(controller.signal)
+			.then(catalog => {
+				if (!controller.signal.aborted) setState({ catalog, loading: false, error: '' })
 			})
 			.catch(() => {
-				if (!cancelled) setCatalog(loadProducts())
+				// No mostrar un catálogo parcial o de ejemplo si falla cualquier página.
+				if (!controller.signal.aborted) {
+					setState({ catalog: [], loading: false, error: 'No pudimos cargar los productos. Intentá nuevamente.' })
+				}
 			})
 
-		return () => {
-			cancelled = true
-		}
-	}, [])
+		return () => controller.abort()
+	}, [attempt])
 
-	return catalog
+	return { ...state, reload }
 }

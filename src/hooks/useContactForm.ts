@@ -1,6 +1,6 @@
 // Hook que valida y envía el formulario de contacto a la API.
 import { useState } from 'react'
-import { apiFetch } from '../api/client'
+import { apiFetch, getErrorMessage } from '../api/client'
 import { isValidEmail } from '../utils/validators'
 
 export const useContactForm = () => {
@@ -37,8 +37,8 @@ export const useContactForm = () => {
 
       setSent(true)
       return true
-    } catch {
-      setError('No se pudo enviar el mensaje. Intentá de nuevo.')
+    } catch (error) {
+      setError(getErrorMessage(error, 'No se pudo enviar el mensaje. Intentá de nuevo.'))
       return false
     } finally {
       setSending(false)

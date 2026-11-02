@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
-import { apiFetch, clearTokens, getAccessToken, login, SESSION_ENDED_EVENT } from '../api/client'
+import { apiFetch, clearTokens, getAccessToken, getErrorMessage, ApiError, login, SESSION_ENDED_EVENT } from '../api/client'
+import { getAdminProfile } from '../api/profile'
 import { buildProductBody } from '../api/productPayload'
 import type { Product } from '../data/products'
 import { mapProducto } from '../hooks/useProducts'
@@ -19,7 +20,9 @@ const defaultForm = {
 
 export default function Admin() {
   const [catalog, setCatalog] = useState<Product[]>([])
-  const [authenticated, setAuthenticated] = useState(() => Boolean(getAccessToken()))
+  const [authenticated, setAuthenticated] = useState(false)
+  const [checkingAccess, setCheckingAccess] = useState(() => Boolean(getAccessToken()))
+  const [sessionAttempt, setSessionAttempt] = useState(0)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
@@ -52,8 +55,11 @@ export default function Admin() {
   }, [imageFile])
 
   useEffect(() => {
+    const controller = new AbortController()
     const onSessionEnded = () => {
+      controller.abort()
       setAuthenticated(false)
+      setCheckingAccess(false)
       setCatalog([])
       setPassword('')
       setEditingId(null)
@@ -64,8 +70,28 @@ export default function Admin() {
       setLoginError('La sesión terminó. Ingresá nuevamente.')
     }
     window.addEventListener(SESSION_ENDED_EVENT, onSessionEnded)
-    return () => window.removeEventListener(SESSION_ENDED_EVENT, onSessionEnded)
-  }, [])
+
+    if (getAccessToken()) {
+      getAdminProfile(controller.signal)
+        .then(() => {
+          if (!controller.signal.aborted) setAuthenticated(true)
+        })
+        .catch(error => {
+          if (!controller.signal.aborted) {
+            setAuthenticated(false)
+            setLoginError(getErrorMessage(error, 'No pudimos comprobar tus permisos. Intentá iniciar sesión nuevamente.'))
+          }
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setCheckingAccess(false)
+        })
+    }
+
+    return () => {
+      controller.abort()
+      window.removeEventListener(SESSION_ENDED_EVENT, onSessionEnded)
+    }
+  }, [sessionAttempt])
 
   const loadCatalog = useCallback(async () => {
     setLoading(true)
@@ -82,8 +108,8 @@ export default function Admin() {
       }
 
       setCatalog(items)
-    } catch {
-      setSaveError('No se pudo cargar el catálogo desde la API.')
+    } catch (error) {
+      setSaveError(getErrorMessage(error, 'No se pudo cargar el catálogo desde la API.'))
     } finally {
       setLoading(false)
     }
@@ -127,10 +153,14 @@ export default function Admin() {
 
     try {
       await login(username.trim(), password)
-      setAuthenticated(true)
+      setAuthenticated(false)
+      setCheckingAccess(true)
+      setSessionAttempt(current => current + 1)
       setPassword('')
-    } catch {
-      setLoginError('Usuario o contraseña incorrectos.')
+    } catch (error) {
+      setLoginError(error instanceof ApiError && error.status === 401
+        ? 'Usuario o contraseña incorrectos.'
+        : getErrorMessage(error, 'No pudimos iniciar sesión. Intentá nuevamente.'))
     } finally {
       setSaving(false)
     }
@@ -166,8 +196,8 @@ export default function Admin() {
       setImagePreview(defaultForm.image)
       if (fileInputRef.current) fileInputRef.current.value = ''
       setEditingId(null)
-    } catch {
-      setSaveError('No se pudo guardar el producto. Revisá la sesión y los datos.')
+    } catch (error) {
+      setSaveError(getErrorMessage(error, 'No se pudo guardar el producto. Intentá nuevamente.'))
     } finally {
       setSaving(false)
     }
@@ -216,9 +246,20 @@ export default function Admin() {
       if (editingId === product.id) {
         handleCancelEdit()
       }
-    } catch {
-      setDeleteError('No se pudo eliminar el producto.')
+    } catch (error) {
+      setDeleteError(getErrorMessage(error, 'No se pudo eliminar el producto.'))
     }
+  }
+
+  if (checkingAccess) {
+    return (
+      <main className="admin-page">
+        <section className="section">
+          <p role="status">Verificando permisos de administración...</p>
+          <button type="button" className="button" onClick={handleLogout}>Cerrar sesión</button>
+        </section>
+      </main>
+    )
   }
 
   if (!authenticated) {

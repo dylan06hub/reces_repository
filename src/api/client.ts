@@ -9,6 +9,49 @@ type Tokens = {
   refresh: string
 }
 
+export class ApiError extends Error {
+  status: number
+  details: unknown
+
+  constructor(status: number, details: unknown) {
+    super(`API ${status}`)
+    this.name = 'ApiError'
+    this.status = status
+    this.details = details
+  }
+}
+
+const fieldLabels: Record<string, string> = {
+  nombre: 'Nombre', email: 'Email', telefono: 'Teléfono', mensaje: 'Mensaje',
+  precio: 'Precio', previousPrice: 'Precio anterior', offer: 'Oferta',
+  descripcion: 'Descripción', imagen_upload: 'Imagen', username: 'Usuario', password: 'Contraseña',
+}
+
+const collectMessages = (value: unknown, field = ''): string[] => {
+  if (typeof value === 'string') return [field ? `${field}: ${value}` : value]
+  if (Array.isArray(value)) return value.flatMap(item => collectMessages(item, field))
+  if (value && typeof value === 'object') {
+    return Object.entries(value).flatMap(([key, item]) => {
+      if (key === 'code') return []
+      const label = key === 'detail' || key === 'non_field_errors' ? field : fieldLabels[key] || key
+      return collectMessages(item, label)
+    })
+  }
+  return []
+}
+
+export const getErrorMessage = (error: unknown, fallback: string): string => {
+  // Los errores de validación son útiles; una respuesta interna 500 no se muestra al usuario.
+  if (!(error instanceof ApiError) || error.status >= 500) return fallback
+  const messages = collectMessages(error.details)
+  return messages.length ? messages.join(' ') : fallback
+}
+
+const responseError = async (response: Response) => {
+  const details: unknown = await response.json().catch(() => null)
+  return new ApiError(response.status, details)
+}
+
 export const getAccessToken = () => window.localStorage.getItem(ACCESS_KEY)
 
 export const clearTokens = () => {
@@ -66,7 +109,7 @@ const performRefresh = async () => {
 
   if (!response.ok) {
     if (response.status === 400 || response.status === 401) clearTokens()
-    throw new Error(`API ${response.status}`)
+    throw await responseError(response)
   }
 
   const data = await response.json() as Tokens
@@ -100,7 +143,7 @@ export const apiFetch = async <T>(path: string, options: RequestInit = {}): Prom
   }
 
   if (!response.ok) {
-    throw new Error(`API ${response.status}`)
+    throw await responseError(response)
   }
 
   return response.status === 204 ? (undefined as T) : response.json()
@@ -111,7 +154,7 @@ export const login = async (username: string, password: string) => {
     method: 'POST',
     body: JSON.stringify({ username, password }),
   }, null)
-  if (!response.ok) throw new Error(`API ${response.status}`)
+  if (!response.ok) throw await responseError(response)
   const tokens = await response.json() as Tokens
 
   saveTokens(tokens)

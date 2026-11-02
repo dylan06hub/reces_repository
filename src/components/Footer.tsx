@@ -1,4 +1,5 @@
 import { useSucursales } from '../hooks/useSucursales'
+import { getWhatsAppUrl } from '../utils/whatsapp'
 
 const IconMapPin = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -312,7 +313,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
               <IconInstagram />
             </a>
-            <a href="https://wa.me/5492800000000" target="_blank" rel="noreferrer" aria-label="WhatsApp">
+            <a href={getWhatsAppUrl()} target="_blank" rel="noreferrer" aria-label="WhatsApp">
               <IconWhatsApp />
             </a>
           </div>

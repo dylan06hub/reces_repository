@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import { apiFetch, clearTokens, getAccessToken, login, SESSION_ENDED_EVENT } from '../api/client'
+import { buildProductBody } from '../api/productPayload'
 import type { Product } from '../data/products'
 import { mapProducto } from '../hooks/useProducts'
 import type { ApiProducto, Paginated } from '../hooks/useProducts'
+
+const DEFAULT_IMAGE = '/img/carne1.jpeg'
 
 const defaultForm = {
   name: '',
   price: '',
   previousPrice: '',
-  image: '/img/carne1.jpeg',
+  image: '',
   offer: true,
   description: 'Corte premium disponible para entrega inmediata.'
 }
@@ -29,7 +32,24 @@ export default function Admin() {
   const formRef = useRef<HTMLFormElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string>(defaultForm.image)
+  const [imagePreview, setImagePreview] = useState('')
+  const [removeImage, setRemoveImage] = useState(false)
+  const displayedImage = imageFile ? imagePreview || DEFAULT_IMAGE
+    : removeImage ? DEFAULT_IMAGE : form.image || DEFAULT_IMAGE
+
+  useEffect(() => {
+    if (!imageFile) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      setImagePreview(typeof reader.result === 'string' ? reader.result : '')
+    }
+    reader.readAsDataURL(imageFile)
+    // Evitar que una lectura anterior cambie la vista previa de otra selección.
+    return () => {
+      reader.onload = null
+      if (reader.readyState === FileReader.LOADING) reader.abort()
+    }
+  }, [imageFile])
 
   useEffect(() => {
     const onSessionEnded = () => {
@@ -39,6 +59,7 @@ export default function Admin() {
       setEditingId(null)
       setForm(defaultForm)
       setImageFile(null)
+      setRemoveImage(false)
       setImagePreview(defaultForm.image)
       setLoginError('La sesión terminó. Ingresá nuevamente.')
     }
@@ -56,7 +77,7 @@ export default function Admin() {
 
       while (next) {
         const page: Paginated<ApiProducto> = await apiFetch<Paginated<ApiProducto>>(next)
-        items.push(...page.results.map(mapProducto))
+        items.push(...page.results.map(product => ({ ...mapProducto(product), image: product.imagen || '' })))
         next = page.next
       }
 
@@ -86,18 +107,17 @@ export default function Admin() {
   }
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) {
-      setImageFile(null)
-      setImagePreview(form.image)
-      return
-    }
+    const file = event.target.files?.[0] || null
     setImageFile(file)
-    const reader = new FileReader()
-    reader.onload = () => {
-      setImagePreview(typeof reader.result === 'string' ? reader.result : form.image)
-    }
-    reader.readAsDataURL(file)
+    setImagePreview('')
+    if (file) setRemoveImage(false)
+  }
+
+  const handleRemoveImage = () => {
+    setImageFile(null)
+    setImagePreview('')
+    setRemoveImage(true)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
@@ -131,53 +151,18 @@ export default function Admin() {
     event.preventDefault()
     setSaveError('')
 
-    const imageValue = form.image.trim()
-    if (imageValue.startsWith('data:')) {
-      setSaveError('Seleccioná un archivo desde el campo de imagen.')
-      return
-    }
-
-    const isFile = imageValue.startsWith('file://')
-    if (isFile) {
-      setSaveError('Seleccioná un archivo desde el campo de imagen.')
-      return
-    }
-
     setSaving(true)
 
     try {
-      if (imageFile) {
-        const formData = new FormData()
-        formData.append('nombre', form.name.trim() || 'Nuevo producto')
-        formData.append('precio', String(Number(form.price) || 0))
-        if (form.previousPrice) formData.append('previousPrice', String(Number(form.previousPrice)))
-        formData.append('offer', String(form.offer))
-        formData.append('descripcion', form.description.trim() || 'Corte seleccionado')
-        formData.append('imagen_upload', imageFile)
-
-        await apiFetch(editingId === null ? '/productos/' : `/productos/${editingId}/`, {
-          method: editingId === null ? 'POST' : 'PATCH',
-          body: formData,
-        })
-      } else {
-        const payload = {
-          nombre: form.name.trim() || 'Nuevo producto',
-          precio: Number(form.price) || 0,
-          previousPrice: form.previousPrice ? Number(form.previousPrice) : null,
-          offer: form.offer,
-          imagen: imageValue || '',
-          descripcion: form.description.trim() || 'Corte seleccionado',
-        }
-
-        await apiFetch(editingId === null ? '/productos/' : `/productos/${editingId}/`, {
-          method: editingId === null ? 'POST' : 'PATCH',
-          body: JSON.stringify(payload),
-        })
-      }
+      await apiFetch(editingId === null ? '/productos/' : `/productos/${editingId}/`, {
+        method: editingId === null ? 'POST' : 'PATCH',
+        body: buildProductBody(form, imageFile, removeImage),
+      })
 
       await loadCatalog()
       setForm(defaultForm)
       setImageFile(null)
+      setRemoveImage(false)
       setImagePreview(defaultForm.image)
       if (fileInputRef.current) fileInputRef.current.value = ''
       setEditingId(null)
@@ -194,6 +179,7 @@ export default function Admin() {
     setEditingId(product.id)
     setSaveError('')
     setImageFile(null)
+    setRemoveImage(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
     setForm({
       name: product.name,
@@ -211,6 +197,7 @@ export default function Admin() {
     setEditingId(null)
     setForm(defaultForm)
     setImageFile(null)
+    setRemoveImage(false)
     setImagePreview(defaultForm.image)
     if (fileInputRef.current) fileInputRef.current.value = ''
     setSaveError('')
@@ -318,14 +305,18 @@ export default function Admin() {
             </label>
             <label>
               <span>Subir imagen (archivo)</span>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} />
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} disabled={saving} />
             </label>
-            <label>
-              <span>URL de imagen (opcional)</span>
-              <input name="image" value={form.image} onChange={handleChange} placeholder="/img/carne1.jpeg o https://..." />
-            </label>
+            {(imageFile || form.image) && !removeImage && (
+              <button type="button" className="admin-cancel-button" onClick={handleRemoveImage} disabled={saving}>
+                Quitar imagen
+              </button>
+            )}
+            {removeImage && (
+              <small role="status">La imagen se quitará al guardar. Podés seleccionar otra para reemplazarla.</small>
+            )}
             <div className="producto-imagen" style={{ maxWidth: '200px' }}>
-              <img src={imagePreview} alt="Vista previa" />
+              <img src={displayedImage} alt="Vista previa" />
             </div>
           </div>
 
@@ -360,7 +351,7 @@ export default function Admin() {
 
           <article className="producto-card admin-product-card">
             <div className="producto-imagen">
-              <img src={form.image || '/img/carne1.jpeg'} alt={form.name || 'Producto'} />
+              <img src={displayedImage} alt={form.name || 'Producto'} />
               {form.offer && <span className="badge">OFERTA</span>}
             </div>
 
@@ -394,7 +385,7 @@ export default function Admin() {
           {catalog.map((product, index) => (
             <article className="producto-card" key={product.id ?? `${product.name}-${index}`}>
               <div className="producto-imagen">
-                <img src={product.image} alt={product.name} />
+                <img src={product.image || DEFAULT_IMAGE} alt={product.name} />
                 {product.offer && <span className="badge">OFERTA</span>}
               </div>
 

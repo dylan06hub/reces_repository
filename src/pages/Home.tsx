@@ -1,7 +1,10 @@
 // Página inicial con carrusel, catálogo y garantía de calidad.
 
+import { useSearchParams } from 'react-router-dom'
+import { filterProducts } from '../utils/filterProducts'
 import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
+import { getWhatsAppUrl } from '../utils/whatsapp'
 import Badge from '../components/Badge'
 import Carrusel from '../components/Carrusel'
 
@@ -20,51 +23,12 @@ const MessageIcon = () => (
 )
 
 const Home = () => {
-  const products = useProducts()
+  const { catalog, loading, error, reload } = useProducts()
+  const [params] = useSearchParams()
+  const products = filterProducts(catalog, params.get('buscar') ?? '')
 
   const handleWhatsappConsult = (productName: string) => {
-    const newWindow = window.open('about:blank', '_blank')
-
-    if (!newWindow) return
-
-    newWindow.document.write(`
-      <html>
-        <head>
-          <title>WhatsApp</title>
-          <meta charset="UTF-8" />
-          <style>
-            body {
-              margin: 0;
-              min-height: 100vh;
-              display: grid;
-              place-items: center;
-              background: #f4f4f4;
-              font-family: Helvetica, Arial, sans-serif;
-              color: #111;
-            }
-            .card {
-              background: white;
-              padding: 32px 40px;
-              border-radius: 16px;
-              box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-              text-align: center;
-            }
-            p {
-              margin: 0;
-              font-size: 1.2rem;
-              font-weight: 600;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="card">
-            <p>Acá el WhatsApp</p>
-            <p style="margin-top: 12px; font-size: 0.9rem; color: #555;">Consulta por: ${productName}</p>
-          </div>
-        </body>
-      </html>
-    `)
-    newWindow.document.close()
+    window.open(getWhatsAppUrl(productName), '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -96,8 +60,24 @@ const Home = () => {
           </div>
 
 
+          <div className="catalog-status" role="status" aria-live="polite">
+            {loading && <p>Cargando productos...</p>}
+            {!loading && !error && catalog.length === 0 && (
+              <p>Por el momento no hay productos disponibles.</p>
+            )}
+            {!loading && !error && catalog.length > 0 && products.length === 0 && (
+              <p>No encontramos cortes con ese nombre. Probá con otra búsqueda.</p>
+            )}
+          </div>
+          {error && (
+            <div className="catalog-status">
+              <p className="form-message form-message--error" role="alert">{error}</p>
+              <button type="button" className="button" onClick={reload}>Reintentar</button>
+            </div>
+          )}
+
           {/* GRILLA DE PRODUCTOS */}
-          <div className="productos-grid">
+          <div className="productos-grid" aria-busy={loading}>
 
             {products.map((product, index) => (
 

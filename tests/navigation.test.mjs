@@ -56,7 +56,7 @@ test('los enlaces internos apuntan a las rutas reales y una ruta desconocida mue
   const router = makeRouter()
   try {
     const home = render(router)
-    assert.match(home, /href="\/contacto"[^>]*>↑ Sucursal Más Cercana/)
+    assert.match(home, /href="\/contacto"[^>]*>Encontrá tu sucursal/)
     assert.match(home, /href="\/admin"/)
     await router.navigate('/no-existe')
     const missing = render(router)
@@ -77,5 +77,20 @@ test('la URL conserva la búsqueda en el campo al navegar y al volver', async ()
     assert.match(render(router), /type="search"[^>]*value="Vacío"/)
     await router.navigate('/', { replace: true })
     assert.match(render(router), /type="search"[^>]*value=""/)
+  } finally { router.dispose() }
+})
+
+
+test('el carrusel conserva el catálogo y ofrece controles accesibles', () => {
+  const router = makeRouter()
+  try {
+    const home = render(router)
+    assert.match(home, /aria-roledescription="carrusel"/)
+    assert.match(home, /href="#productos"/)
+    assert.doesNotMatch(home, /aria-label="Contenido anterior"/)
+    assert.doesNotMatch(home, /aria-label="Contenido siguiente"/)
+    assert.equal((home.match(/aria-label="Mostrar:/g) ?? []).length, 3)
+    assert.equal((home.match(/aria-current="true"/g) ?? []).length, 1)
+    assert.doesNotMatch(home, /carrusel-pausa|carrusel-navegacion/)
   } finally { router.dispose() }
 })

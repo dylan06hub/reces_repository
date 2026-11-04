@@ -7,9 +7,10 @@ const source = await readFile(new URL('../src/api/client.ts', import.meta.url), 
 const compiled = ts.transpileModule(source.replace('import.meta.env.VITE_API_URL', "'http://api.test/api'"), {
   compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
 }).outputText
+const sharedLocks = navigator.locks
 let moduleId = 0
-async function setup() {
-  const storage = new Map([['reces-access', 'a0'], ['reces-refresh', 'r0']])
+async function setup({ storage = new Map([['reces-access', 'a0'], ['reces-refresh', 'r0']]), locks } = {}) {
+  Object.defineProperty(globalThis, 'navigator', { value: { locks }, configurable: true })
   const events = new EventTarget()
   globalThis.window = {
     localStorage: {
@@ -167,4 +168,84 @@ test('un 401 en una consulta pública no intenta renovar ni borra los tokens del
   await assert.rejects(c.apiFetch('/productos/', { auth: false }), error => error.status === 401)
   assert.equal(calls, 1)
   assert.equal(c.storage.get('reces-refresh'), 'r0')
+})
+
+
+// Dos módulos representan pestañas distintas con storage y Web Locks compartidos.
+test('dos pestañas comparten una renovación y ambas completan su solicitud', async () => {
+  const locks = sharedLocks
+  const a = await setup({ locks })
+  const b = await setup({ storage: a.storage, locks })
+  let refreshes = 0
+  globalThis.fetch = async (url, options) => {
+    if (url.endsWith('/auth/token/refresh/')) {
+      refreshes++
+      return json({ access: 'a1', refresh: 'r1' })
+    }
+    return options.headers.Authorization === 'Bearer a0' ? json({}, 401) : json({ ok: true })
+  }
+  const results = await Promise.all([a.apiFetch('/one/'), b.apiFetch('/two/')])
+  assert.deepEqual(results, [{ ok: true }, { ok: true }])
+  assert.equal(refreshes, 1)
+  assert.equal(a.storage.get('reces-refresh'), 'r1')
+})
+
+test('cerrar sesión en otra pestaña durante la renovación no restaura la sesión', async () => {
+  const locks = sharedLocks
+  const a = await setup({ locks })
+  const b = await setup({ storage: a.storage, locks })
+  let started, finish
+  const ready = new Promise(resolve => { started = resolve })
+  let refreshes = 0
+  globalThis.fetch = async url => {
+    if (url.endsWith('/auth/token/refresh/')) {
+      refreshes++
+      if (refreshes > 1) return json({ access: 'a2', refresh: 'r2' })
+      started()
+      return new Promise(resolve => { finish = resolve })
+    }
+    return json({}, 401)
+  }
+  const requests = Promise.allSettled([a.apiFetch('/one/'), b.apiFetch('/two/')])
+  await ready
+  b.clearTokens()
+  finish(json({ access: 'a1', refresh: 'r1' }))
+  const results = await requests
+  assert.ok(results.every(result => result.status === 'rejected'))
+  assert.equal(refreshes, 1)
+  assert.equal(a.storage.size, 0)
+})
+
+test('una renovación fallida libera el lock para la otra pestaña', async () => {
+  const locks = sharedLocks
+  const a = await setup({ locks })
+  const b = await setup({ storage: a.storage, locks })
+  let refreshes = 0
+  globalThis.fetch = async (url, options) => {
+    if (url.endsWith('/auth/token/refresh/')) {
+      refreshes++
+      return refreshes === 1 ? json({}, 503) : json({ access: 'a1', refresh: 'r1' })
+    }
+    return options.headers.Authorization === 'Bearer a0' ? json({}, 401) : json({ ok: true })
+  }
+  const results = await Promise.allSettled([a.apiFetch('/one/'), b.apiFetch('/two/')])
+  assert.equal(results[0].status, 'rejected')
+  assert.deepEqual(results[1], { status: 'fulfilled', value: { ok: true } })
+  assert.equal(refreshes, 2)
+  assert.equal(a.storage.get('reces-refresh'), 'r1')
+})
+
+test('un refresh inválido termina la sesión de las pestañas sin renovaciones repetidas', async () => {
+  const locks = sharedLocks
+  const a = await setup({ locks })
+  const b = await setup({ storage: a.storage, locks })
+  let refreshes = 0
+  globalThis.fetch = async url => {
+    if (url.endsWith('/auth/token/refresh/')) refreshes++
+    return json({}, 401)
+  }
+  const results = await Promise.allSettled([a.apiFetch('/one/'), b.apiFetch('/two/')])
+  assert.ok(results.every(result => result.status === 'rejected'))
+  assert.equal(refreshes, 1)
+  assert.equal(a.storage.size, 0)
 })

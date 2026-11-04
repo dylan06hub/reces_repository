@@ -119,10 +119,19 @@ const performRefresh = async () => {
   return data.access
 }
 
-const refreshAccessToken = () => {
-  // Las solicitudes que vencen juntas comparten una única renovación.
+const refreshAccessToken = (expiredToken: string) => {
   if (!refreshInFlight) {
-    refreshInFlight = performRefresh().finally(() => { refreshInFlight = null })
+    const renew = () => {
+      // Otra pestaña pudo renovar o cerrar la sesión mientras esperábamos el lock.
+      const currentToken = getAccessToken()
+      if (!currentToken || currentToken !== expiredToken) return currentToken
+      return performRefresh()
+    }
+    const renewal = typeof navigator !== 'undefined' && navigator.locks
+      ? navigator.locks.request('reces-token-refresh', renew)
+      // shortcut: sin Web Locks se coordina solo esta pestaña; usar navegador compatible para varias.
+      : Promise.resolve().then(renew)
+    refreshInFlight = renewal.finally(() => { refreshInFlight = null })
   }
   return refreshInFlight
 }
@@ -139,7 +148,7 @@ export const apiFetch = async <T>(
     const currentToken = getAccessToken()
     const renewedToken = currentToken && currentToken !== token
       ? currentToken
-      : currentToken ? await refreshAccessToken() : null
+      : currentToken ? await refreshAccessToken(token) : null
     if (renewedToken) {
       response = await request(path, options, renewedToken)
       if (response.status === 401 && getAccessToken() === renewedToken) clearTokens()

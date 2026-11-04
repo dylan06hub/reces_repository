@@ -43,8 +43,8 @@ test('subir o reemplazar una imagen utiliza multipart y el archivo seleccionado'
 
 test('un nuevo archivo tiene prioridad sobre una eliminación anterior', () => {
   const file = new File(['imagen'], 'nuevo.png', { type: 'image/png' })
-  const body = buildProductBody({ ...form, offer: true, previousPrice: '1800' }, file, true)
+  const body = buildProductBody({ ...form, offer: true, previousPrice: '1800.75' }, file, true)
   assert.equal(body.get('imagen_upload'), file)
-  assert.equal(body.get('previousPrice'), '1800')
+  assert.equal(body.get('previousPrice'), '1800.75')
   assert.equal(body.get('offer'), 'true')
 })

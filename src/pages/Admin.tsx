@@ -335,14 +335,14 @@ export default function Admin() {
             </label>
             <label>
               <span>Precio</span>
-              <input name="price" type="number" value={form.price} onChange={handleChange} placeholder="15000" required />
+              <input name="price" type="number" step="0.01" value={form.price} onChange={handleChange} placeholder="15000" required />
             </label>
           </div>
 
           <div className="form-row">
             <label>
               <span>Precio anterior</span>
-              <input name="previousPrice" type="number" value={form.previousPrice} onChange={handleChange} placeholder="18000" />
+              <input name="previousPrice" type="number" step="0.01" value={form.previousPrice} onChange={handleChange} placeholder="18000" />
             </label>
             <label>
               <span>Subir imagen (archivo)</span>

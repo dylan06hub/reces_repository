@@ -17,7 +17,8 @@ test('consulta solo activas, recorre las páginas y conserva los datos de la API
     telefono: '2801234567', horario: 'Lunes a sábados: 9 a 13',
   }
   const paths = []
-  globalThis.sucursalesFetch = async path => {
+  globalThis.sucursalesFetch = async (path, options) => {
+    assert.equal(options.auth, false)
     paths.push(path)
     return paths.length === 1
       ? { results: [sucursal], next: 'http://api.test/api/sucursales/?activa=true&page=2' }

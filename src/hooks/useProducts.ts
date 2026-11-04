@@ -41,7 +41,7 @@ export const loadProducts = async (signal?: AbortSignal): Promise<Product[]> => 
 
 	while (next) {
 		signal?.throwIfAborted()
-		const page: Paginated<ApiProducto> = await apiFetch<Paginated<ApiProducto>>(next, { signal })
+		const page: Paginated<ApiProducto> = await apiFetch<Paginated<ApiProducto>>(next, { signal, auth: false })
 		catalog.push(...page.results.map(mapProducto))
 		next = page.next
 	}

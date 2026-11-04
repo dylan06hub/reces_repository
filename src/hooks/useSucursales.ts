@@ -17,7 +17,7 @@ export const loadSucursales = async (signal?: AbortSignal): Promise<Sucursal[]> 
   const sucursales: Sucursal[] = []
   while (next) {
     signal?.throwIfAborted()
-    const page: Paginated<Sucursal> = await apiFetch<Paginated<Sucursal>>(next, { signal })
+    const page: Paginated<Sucursal> = await apiFetch<Paginated<Sucursal>>(next, { signal, auth: false })
     sucursales.push(...page.results)
     next = page.next
   }

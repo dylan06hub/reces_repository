@@ -127,8 +127,12 @@ const refreshAccessToken = () => {
   return refreshInFlight
 }
 
-export const apiFetch = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
-  const token = getAccessToken()
+export const apiFetch = async <T>(
+  path: string,
+  { auth = true, ...options }: RequestInit & { auth?: boolean } = {},
+): Promise<T> => {
+  // Las consultas públicas no dependen de la sesión guardada del administrador.
+  const token = auth ? getAccessToken() : null
   let response = await request(path, options, token)
 
   if (response.status === 401 && token) {

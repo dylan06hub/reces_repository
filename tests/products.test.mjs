@@ -17,7 +17,8 @@ const product = id => ({
 
 test('carga las 16 entradas de varias páginas y solicita solo activos', async () => {
   const paths = []
-  globalThis.catalogFetch = async path => {
+  globalThis.catalogFetch = async (path, options) => {
+    assert.equal(options.auth, false)
     paths.push(path)
     const second = path.startsWith('http')
     return {

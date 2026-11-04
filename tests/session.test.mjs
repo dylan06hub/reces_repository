@@ -135,3 +135,36 @@ test('login no adjunta tokens viejos ni intenta renovarlos', async () => {
   assert.equal(calls, 1)
   assert.equal(c.storage.get('reces-refresh'), 'new-refresh')
 })
+
+
+test('catálogo y sucursales públicos cargan con tokens vencidos sin renovar ni cerrar la sesión', async () => {
+  const c = await setup()
+  c.storage.set('reces-access', 'expired')
+  c.storage.set('reces-refresh', 'invalid')
+  const calls = []
+  let ended = 0
+  c.events.addEventListener(c.SESSION_ENDED_EVENT, () => ended++)
+  globalThis.fetch = async (url, options) => {
+    calls.push(url)
+    assert.equal(options.headers.Authorization, undefined)
+    assert.equal(Object.hasOwn(options, 'auth'), false)
+    return json({ results: [{ id: 1 }] })
+  }
+  for (const path of ['/productos/?activo=true', '/sucursales/?activa=true']) {
+    const response = await c.apiFetch(path, { auth: false })
+    assert.equal(response.results[0].id, 1)
+  }
+  assert.equal(calls.length, 2)
+  assert.equal(c.storage.get('reces-access'), 'expired')
+  assert.equal(c.storage.get('reces-refresh'), 'invalid')
+  assert.equal(ended, 0)
+})
+
+test('un 401 en una consulta pública no intenta renovar ni borra los tokens del panel', async () => {
+  const c = await setup()
+  let calls = 0
+  globalThis.fetch = async () => { calls++; return json({}, 401) }
+  await assert.rejects(c.apiFetch('/productos/', { auth: false }), error => error.status === 401)
+  assert.equal(calls, 1)
+  assert.equal(c.storage.get('reces-refresh'), 'r0')
+})

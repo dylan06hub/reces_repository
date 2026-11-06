@@ -30,7 +30,8 @@ export const mapProducto = (producto: ApiProducto): Product => ({
 	price: Number(producto.precio),
 	previousPrice: producto.previousPrice ? Number(producto.previousPrice) : undefined,
 	offer: producto.offer,
-	image: producto.imagen || '/img/carne1.jpeg',
+	// El catálogo público usa las fotos locales; el admin conserva la imagen cargada.
+	image: `/img/carne${((producto.id - 1) % 11) + 2}.jpeg`,
 	description: producto.descripcion || 'Corte seleccionado',
 })
 

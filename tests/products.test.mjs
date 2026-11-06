@@ -9,7 +9,7 @@ const compiled = ts.transpileModule(source
   .replace("import { apiFetch } from '../api/client'", 'const apiFetch = (...args: unknown[]) => globalThis.catalogFetch(...args)'), {
   compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
 }).outputText
-const { loadProducts } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`)
+const { loadProducts, mapProducto } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`)
 const product = id => ({
   id, nombre: `Producto ${id}`, descripcion: 'Corte seleccionado', precio: '1250.50',
   previousPrice: '1500.00', offer: true, imagen: null, activo: true,
@@ -32,7 +32,7 @@ test('carga las 16 entradas de varias páginas y solicita solo activos', async (
   assert.equal(catalog[15].id, 16)
   assert.equal(catalog[0].price, 1250.5)
   assert.equal(catalog[0].previousPrice, 1500)
-  assert.equal(catalog[0].image, '/img/carne1.jpeg')
+  assert.equal(catalog[0].image, '/img/carne2.jpeg')
 })
 
 test('un catálogo vacío se devuelve vacío, sin productos de ejemplo', async () => {
@@ -70,4 +70,15 @@ test('propaga la cancelación y no continúa cargando páginas', async () => {
   }
   await assert.rejects(loadProducts(controller.signal), { name: 'AbortError' })
   assert.equal(calls, 1)
+})
+
+test('las imágenes públicas son estables por producto y existen en public', async () => {
+  for (let id = 1; id <= 24; id++) {
+    const item = { ...product(id), imagen: 'https://api.test/media/anterior.png' }
+    const mapped = mapProducto(item)
+    assert.equal(mapped.image, `/img/carne${((id - 1) % 11) + 2}.jpeg`)
+    const contents = await readFile(new URL(`../public${mapped.image}`, import.meta.url))
+    assert.ok(contents.length > 0)
+    assert.equal(mapProducto(item).image, mapped.image)
+  }
 })
